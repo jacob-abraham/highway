@@ -90,10 +90,10 @@ HWY_API Vec256<T> BitCast(Full256<T> d, Vec256<FromT> v) {
 // Returns an all-zero vector/part.
 template <typename T>
 HWY_API Vec256<T> Zero(Full256<T> /* tag */) {
-  return Vec256<T>{wasm_i32x4_splat(0)};
+  return Vec256<T>{wasm_i32x4_splat(0), wasm_i32x4_splat(0)};
 }
 HWY_API Vec256<float> Zero(Full256<float> /* tag */) {
-  return Vec256<float>{wasm_f32x4_splat(0.0f)};
+  return Vec256<float>{wasm_f32x4_splat(0.0f), wasm_f32x4_splat(0.0f)};
 }
 
 template <class D>
@@ -103,33 +103,33 @@ using VFromD = decltype(Zero(D()));
 
 // Returns a vector/part with all lanes set to "t".
 HWY_API Vec256<uint8_t> Set(Full256<uint8_t> /* tag */, const uint8_t t) {
-  return Vec256<uint8_t>{wasm_i8x16_splat(static_cast<int8_t>(t))};
+  return Vec256<uint8_t>{wasm_i8x16_splat(static_cast<int8_t>(t)), wasm_i8x16_splat(static_cast<int8_t>(t))};
 }
 HWY_API Vec256<uint16_t> Set(Full256<uint16_t> /* tag */, const uint16_t t) {
-  return Vec256<uint16_t>{wasm_i16x8_splat(static_cast<int16_t>(t))};
+  return Vec256<uint16_t>{wasm_i16x8_splat(static_cast<int16_t>(t)), wasm_i16x8_splat(static_cast<int16_t>(t))};
 }
 HWY_API Vec256<uint32_t> Set(Full256<uint32_t> /* tag */, const uint32_t t) {
-  return Vec256<uint32_t>{wasm_i32x4_splat(static_cast<int32_t>(t))};
+  return Vec256<uint32_t>{wasm_i32x4_splat(static_cast<int32_t>(t)), {wasm_i32x4_splat(static_cast<int32_t>(t))};
 }
 HWY_API Vec256<uint64_t> Set(Full256<uint64_t> /* tag */, const uint64_t t) {
-  return Vec256<uint64_t>{wasm_i64x2_splat(static_cast<int64_t>(t))};
+  return Vec256<uint64_t>{wasm_i64x2_splat(static_cast<int64_t>(t)), {wasm_i64x2_splat(static_cast<int64_t>(t))};
 }
 
 HWY_API Vec256<int8_t> Set(Full256<int8_t> /* tag */, const int8_t t) {
-  return Vec256<int8_t>{wasm_i8x16_splat(t)};
+  return Vec256<int8_t>{wasm_i8x16_splat(t), wasm_i8x16_splat(t)};
 }
 HWY_API Vec256<int16_t> Set(Full256<int16_t> /* tag */, const int16_t t) {
-  return Vec256<int16_t>{wasm_i16x8_splat(t)};
+  return Vec256<int16_t>{wasm_i16x8_splat(t), wasm_i16x8_splat(t)};
 }
 HWY_API Vec256<int32_t> Set(Full256<int32_t> /* tag */, const int32_t t) {
-  return Vec256<int32_t>{wasm_i32x4_splat(t)};
+  return Vec256<int32_t>{wasm_i32x4_splat(t), wasm_i32x4_splat(t)};
 }
 HWY_API Vec256<int64_t> Set(Full256<int64_t> /* tag */, const int64_t t) {
-  return Vec256<int64_t>{wasm_i64x2_splat(t)};
+  return Vec256<int64_t>{wasm_i64x2_splat(t), wasm_i64x2_splat(t)};
 }
 
 HWY_API Vec256<float> Set(Full256<float> /* tag */, const float t) {
-  return Vec256<float>{wasm_f32x4_splat(t)};
+  return Vec256<float>{wasm_f32x4_splat(t), wasm_f32x4_splat(t)};
 }
 
 HWY_DIAGNOSTICS(push)
@@ -146,8 +146,8 @@ HWY_DIAGNOSTICS(pop)
 // Returns a vector with lane i=[0, N) set to "first" + i.
 template <typename T, typename T2>
 Vec256<T> Iota(const Full256<T> d, const T2 first) {
-  HWY_ALIGN T lanes[16 / sizeof(T)];
-  for (size_t i = 0; i < 16 / sizeof(T); ++i) {
+  HWY_ALIGN T lanes[32 / sizeof(T)];
+  for (size_t i = 0; i < 32 / sizeof(T); ++i) {
     lanes[i] = static_cast<T>(first + static_cast<T2>(i));
   }
   return Load(d, lanes);
@@ -160,34 +160,34 @@ Vec256<T> Iota(const Full256<T> d, const T2 first) {
 // Unsigned
 HWY_API Vec256<uint8_t> operator+(const Vec256<uint8_t> a,
                                   const Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_i8x16_add(a.raw, b.raw)};
+  return Vec256<uint8_t>{wasm_i8x16_add(a.v0.raw, b.v0.raw), wasm_i8x16_add(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint16_t> operator+(const Vec256<uint16_t> a,
                                    const Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_i16x8_add(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_i16x8_add(a.v0.raw, b.v0.raw), wasm_i16x8_add(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint32_t> operator+(const Vec256<uint32_t> a,
                                    const Vec256<uint32_t> b) {
-  return Vec256<uint32_t>{wasm_i32x4_add(a.raw, b.raw)};
+  return Vec256<uint32_t>{wasm_i32x4_add(a.v0.raw, b.v0.raw), wasm_i32x4_add(a.v1.raw, b.v1.raw)};
 }
 
 // Signed
 HWY_API Vec256<int8_t> operator+(const Vec256<int8_t> a,
                                  const Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_add(a.raw, b.raw)};
+  return Vec256<int8_t>{wasm_i8x16_add(a.v0.raw, b.v0.raw), wasm_i8x16_add(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int16_t> operator+(const Vec256<int16_t> a,
                                   const Vec256<int16_t> b) {
-  return Vec256<int16_t>{wasm_i16x8_add(a.raw, b.raw)};
+  return Vec256<int16_t>{wasm_i16x8_add(a.v0.raw, b.v0.raw), wasm_i16x8_add(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int32_t> operator+(const Vec256<int32_t> a,
                                   const Vec256<int32_t> b) {
-  return Vec256<int32_t>{wasm_i32x4_add(a.raw, b.raw)};
+  return Vec256<int32_t>{wasm_i32x4_add(a.v0.raw, b.v0.raw), wasm_i32x4_add(a.v1.raw, b.v1.raw)};
 }
 
 // Float
 HWY_API Vec256<float> operator+(const Vec256<float> a, const Vec256<float> b) {
-  return Vec256<float>{wasm_f32x4_add(a.raw, b.raw)};
+  return Vec256<float>{wasm_f32x4_add(a.v0.raw, b.v0.raw), wasm_f32x4_add(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Subtraction
@@ -195,33 +195,33 @@ HWY_API Vec256<float> operator+(const Vec256<float> a, const Vec256<float> b) {
 // Unsigned
 HWY_API Vec256<uint8_t> operator-(const Vec256<uint8_t> a,
                                   const Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_i8x16_sub(a.raw, b.raw)};
+  return Vec256<uint8_t>{wasm_i8x16_sub(a.v0.raw, b.v0.raw), wasm_i8x16_sub(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint16_t> operator-(Vec256<uint16_t> a, Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_i16x8_sub(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_i16x8_sub(a.v0.raw, b.v0.raw), wasm_i16x8_sub(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint32_t> operator-(const Vec256<uint32_t> a,
                                    const Vec256<uint32_t> b) {
-  return Vec256<uint32_t>{wasm_i32x4_sub(a.raw, b.raw)};
+  return Vec256<uint32_t>{wasm_i32x4_sub(a.v0.raw, b.v0.raw), wasm_i32x4_sub(a.v1.raw, b.v1.raw)};
 }
 
 // Signed
 HWY_API Vec256<int8_t> operator-(const Vec256<int8_t> a,
                                  const Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_sub(a.raw, b.raw)};
+  return Vec256<int8_t>{wasm_i8x16_sub(a.v0.raw, b.v0.raw), wasm_i8x16_sub(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int16_t> operator-(const Vec256<int16_t> a,
                                   const Vec256<int16_t> b) {
-  return Vec256<int16_t>{wasm_i16x8_sub(a.raw, b.raw)};
+  return Vec256<int16_t>{wasm_i16x8_sub(a.v0.raw, b.v0.raw), wasm_i16x8_sub(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int32_t> operator-(const Vec256<int32_t> a,
                                   const Vec256<int32_t> b) {
-  return Vec256<int32_t>{wasm_i32x4_sub(a.raw, b.raw)};
+  return Vec256<int32_t>{wasm_i32x4_sub(a.v0.raw, b.v0.raw), wasm_i32x4_sub(a.v1.raw, b.v1.raw)};
 }
 
 // Float
 HWY_API Vec256<float> operator-(const Vec256<float> a, const Vec256<float> b) {
-  return Vec256<float>{wasm_f32x4_sub(a.raw, b.raw)};
+  return Vec256<float>{wasm_f32x4_sub(a.v0.raw, b.v0.raw), wasm_f32x4_sub(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ SumsOf8
@@ -236,21 +236,21 @@ HWY_API Vec256<uint64_t> SumsOf8(const Vec256<uint8_t> v) {
 // Unsigned
 HWY_API Vec256<uint8_t> SaturatedAdd(const Vec256<uint8_t> a,
                                      const Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_u8x16_add_sat(a.raw, b.raw)};
+  return Vec256<uint8_t>{wasm_u8x16_add_sat(a.v0.raw, b.v0.raw), wasm_u8x16_add_sat(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint16_t> SaturatedAdd(const Vec256<uint16_t> a,
                                       const Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_u16x8_add_sat(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_u16x8_add_sat(a.v0.raw, b.v0.raw), wasm_u16x8_add_sat(a.v1.raw, b.v1.raw)};
 }
 
 // Signed
 HWY_API Vec256<int8_t> SaturatedAdd(const Vec256<int8_t> a,
                                     const Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_add_sat(a.raw, b.raw)};
+  return Vec256<int8_t>{wasm_i8x16_add_sat(a.v0.raw, b.v0.raw), wasm_i8x16_add_sat(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int16_t> SaturatedAdd(const Vec256<int16_t> a,
                                      const Vec256<int16_t> b) {
-  return Vec256<int16_t>{wasm_i16x8_add_sat(a.raw, b.raw)};
+  return Vec256<int16_t>{wasm_i16x8_add_sat(a.v0.raw, b.v0.raw), wasm_i16x8_add_sat(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ SaturatedSub
@@ -260,21 +260,21 @@ HWY_API Vec256<int16_t> SaturatedAdd(const Vec256<int16_t> a,
 // Unsigned
 HWY_API Vec256<uint8_t> SaturatedSub(const Vec256<uint8_t> a,
                                      const Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_u8x16_sub_sat(a.raw, b.raw)};
+  return Vec256<uint8_t>{wasm_u8x16_sub_sat(a.v0.raw, b.v0.raw), wasm_u8x16_sub_sat(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint16_t> SaturatedSub(const Vec256<uint16_t> a,
                                       const Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_u16x8_sub_sat(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_u16x8_sub_sat(a.v0.raw, b.v0.raw), wasm_u16x8_sub_sat(a.v1.raw, b.v1.raw)};
 }
 
 // Signed
 HWY_API Vec256<int8_t> SaturatedSub(const Vec256<int8_t> a,
                                     const Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_sub_sat(a.raw, b.raw)};
+  return Vec256<int8_t>{wasm_i8x16_sub_sat(a.v0.raw, b.v0.raw), wasm_i8x16_sub_sat(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int16_t> SaturatedSub(const Vec256<int16_t> a,
                                      const Vec256<int16_t> b) {
-  return Vec256<int16_t>{wasm_i16x8_sub_sat(a.raw, b.raw)};
+  return Vec256<int16_t>{wasm_i16x8_sub_sat(a.v0.raw, b.v0.raw), wasm_i16x8_sub_sat(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Average
@@ -284,31 +284,31 @@ HWY_API Vec256<int16_t> SaturatedSub(const Vec256<int16_t> a,
 // Unsigned
 HWY_API Vec256<uint8_t> AverageRound(const Vec256<uint8_t> a,
                                      const Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_u8x16_avgr(a.raw, b.raw)};
+  return Vec256<uint8_t>{wasm_u8x16_avgr(a.v0.raw, b.v0.raw), wasm_u8x16_avgr(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint16_t> AverageRound(const Vec256<uint16_t> a,
                                       const Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_u16x8_avgr(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_u16x8_avgr(a.v0.raw, b.v0.raw), wasm_u16x8_avgr(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Absolute value
 
 // Returns absolute value, except that LimitsMin() maps to LimitsMax() + 1.
 HWY_API Vec256<int8_t> Abs(const Vec256<int8_t> v) {
-  return Vec256<int8_t>{wasm_i8x16_abs(v.raw)};
+  return Vec256<int8_t>{wasm_i8x16_abs(v.v0.raw), wasm_i8x16_abs(v.v1.raw)};
 }
 HWY_API Vec256<int16_t> Abs(const Vec256<int16_t> v) {
-  return Vec256<int16_t>{wasm_i16x8_abs(v.raw)};
+  return Vec256<int16_t>{wasm_i16x8_abs(v.v0.raw), wasm_i16x8_abs(v.v1.raw)};
 }
 HWY_API Vec256<int32_t> Abs(const Vec256<int32_t> v) {
-  return Vec256<int32_t>{wasm_i32x4_abs(v.raw)};
+  return Vec256<int32_t>{wasm_i32x4_abs(v.v0.raw), wasm_i32x4_abs(v.v1.raw)};
 }
 HWY_API Vec256<int64_t> Abs(const Vec256<int64_t> v) {
-  return Vec256<int32_t>{wasm_i62x2_abs(v.raw)};
+  return Vec256<int32_t>{wasm_i62x2_abs(v.v0.raw), wasm_i62x2_abs(v.v1.raw)};
 }
 
 HWY_API Vec256<float> Abs(const Vec256<float> v) {
-  return Vec256<float>{wasm_f32x4_abs(v.raw)};
+  return Vec256<float>{wasm_f32x4_abs(v.v0.raw), wasm_f32x4_abs(v.v1.raw)};
 }
 
 // ------------------------------ Shift lanes by constant #bits
@@ -316,37 +316,37 @@ HWY_API Vec256<float> Abs(const Vec256<float> v) {
 // Unsigned
 template <int kBits>
 HWY_API Vec256<uint16_t> ShiftLeft(const Vec256<uint16_t> v) {
-  return Vec256<uint16_t>{wasm_i16x8_shl(v.raw, kBits)};
+  return Vec256<uint16_t>{wasm_i16x8_shl(v.v0.raw, kBits), wasm_i16x8_shl(v.v1.raw, kBits)};
 }
 template <int kBits>
 HWY_API Vec256<uint16_t> ShiftRight(const Vec256<uint16_t> v) {
-  return Vec256<uint16_t>{wasm_u16x8_shr(v.raw, kBits)};
+  return Vec256<uint16_t>{wasm_u16x8_shr(v.v0.raw, kBits), wasm_u16x8_shr(v.v1.raw, kBits)};
 }
 template <int kBits>
 HWY_API Vec256<uint32_t> ShiftLeft(const Vec256<uint32_t> v) {
-  return Vec256<uint32_t>{wasm_i32x4_shl(v.raw, kBits)};
+  return Vec256<uint32_t>{wasm_i32x4_shl(v.v0.raw, kBits), wasm_i32x4_shl(v.v1.raw, kBits)};
 }
 template <int kBits>
 HWY_API Vec256<uint32_t> ShiftRight(const Vec256<uint32_t> v) {
-  return Vec256<uint32_t>{wasm_u32x4_shr(v.raw, kBits)};
+  return Vec256<uint32_t>{wasm_u32x4_shr(v.v0.raw, kBits), wasm_u32x4_shr(v.v1.raw, kBits)};
 }
 
 // Signed
 template <int kBits>
 HWY_API Vec256<int16_t> ShiftLeft(const Vec256<int16_t> v) {
-  return Vec256<int16_t>{wasm_i16x8_shl(v.raw, kBits)};
+  return Vec256<int16_t>{wasm_i16x8_shl(v.v0.raw, kBits), wasm_i16x8_shl(v.v1.raw, kBits)};
 }
 template <int kBits>
 HWY_API Vec256<int16_t> ShiftRight(const Vec256<int16_t> v) {
-  return Vec256<int16_t>{wasm_i16x8_shr(v.raw, kBits)};
+  return Vec256<int16_t>{wasm_i16x8_shr(v.v0.raw, kBits), wasm_i16x8_shr(v.v1.raw, kBits)};
 }
 template <int kBits>
 HWY_API Vec256<int32_t> ShiftLeft(const Vec256<int32_t> v) {
-  return Vec256<int32_t>{wasm_i32x4_shl(v.raw, kBits)};
+  return Vec256<int32_t>{wasm_i32x4_shl(v.v0.raw, kBits), wasm_i32x4_shl(v.v1.raw, kBits)};
 }
 template <int kBits>
 HWY_API Vec256<int32_t> ShiftRight(const Vec256<int32_t> v) {
-  return Vec256<int32_t>{wasm_i32x4_shr(v.raw, kBits)};
+  return Vec256<int32_t>{wasm_i32x4_shr(v.v0.raw, kBits), wasm_i32x4_shr(v.v1.raw, kBits)};
 }
 
 // 8-bit
@@ -354,7 +354,8 @@ template <int kBits, typename T, HWY_IF_LANE_SIZE(T, 1)>
 HWY_API Vec256<T> ShiftLeft(const Vec256<T> v) {
   const Full256<T> d8;
   // Use raw instead of BitCast to support N=1.
-  const Vec256<T> shifted{ShiftLeft<kBits>(Vec128<MakeWide<T>>{v.raw}).raw};
+  const auto shifted1 = ShiftLeft<kBits>(Vec256<MakeWide<T>>{v.v0.raw, v.v1.raw});
+  const Vec256<T> shifted{shifted1.v0.raw, shifted1.v1.raw};
   return kBits == 1
              ? (v + v)
              : (shifted & Set(d8, static_cast<T>((0xFF << kBits) & 0xFF)));
@@ -364,7 +365,8 @@ template <int kBits>
 HWY_API Vec256<uint8_t> ShiftRight(const Vec256<uint8_t> v) {
   const Full256<uint8_t> d8;
   // Use raw instead of BitCast to support N=1.
-  const Vec256<uint8_t> shifted{ShiftRight<kBits>(Vec128<uint16_t>{v.raw}).raw};
+  const auto shifted1 = ShiftRight<kBits>(Vec256<uint16_t>{v.v0.raw, v.v1.raw});
+  const Vec256<uint8_t> shifted{shifted1.v0.raw, shifted1.v1.raw};
   return shifted & Set(d8, 0xFF >> kBits);
 }
 
@@ -391,35 +393,35 @@ HWY_API Vec256<T> RotateRight(const Vec256<T> v) {
 // Unsigned
 HWY_API Vec256<uint16_t> ShiftLeftSame(const Vec256<uint16_t> v,
                                        const int bits) {
-  return Vec256<uint16_t>{wasm_i16x8_shl(v.raw, bits)};
+  return Vec256<uint16_t>{wasm_i16x8_shl(v.v0.raw, bits), wasm_i16x8_shl(v.v1.raw, bits)};
 }
 HWY_API Vec256<uint16_t> ShiftRightSame(const Vec256<uint16_t> v,
                                         const int bits) {
-  return Vec256<uint16_t>{wasm_u16x8_shr(v.raw, bits)};
+  return Vec256<uint16_t>{wasm_u16x8_shr(v.v0.raw, bits), wasm_u16x8_shr(v.v1.raw, bits)};
 }
 HWY_API Vec256<uint32_t> ShiftLeftSame(const Vec256<uint32_t> v,
                                        const int bits) {
-  return Vec256<uint32_t>{wasm_i32x4_shl(v.raw, bits)};
+  return Vec256<uint32_t>{wasm_i32x4_shl(v.v0.raw, bits), wasm_i32x4_shl(v.v1.raw, bits)};
 }
 HWY_API Vec256<uint32_t> ShiftRightSame(const Vec256<uint32_t> v,
                                         const int bits) {
-  return Vec256<uint32_t>{wasm_u32x4_shr(v.raw, bits)};
+  return Vec256<uint32_t>{wasm_u32x4_shr(v.v0.raw, bits), wasm_u32x4_shr(v.v1.raw, bits)};
 }
 
 // Signed
 HWY_API Vec256<int16_t> ShiftLeftSame(const Vec256<int16_t> v, const int bits) {
-  return Vec256<int16_t>{wasm_i16x8_shl(v.raw, bits)};
+  return Vec256<int16_t>{wasm_i16x8_shl(v.v0.raw, bits), wasm_i16x8_shl(v.v1.raw, bits)};
 }
 HWY_API Vec256<int16_t> ShiftRightSame(const Vec256<int16_t> v,
                                        const int bits) {
-  return Vec256<int16_t>{wasm_i16x8_shr(v.raw, bits)};
+  return Vec256<int16_t>{wasm_i16x8_shr(v.v0.raw, bits), wasm_i16x8_shr(v.v1.raw, bits)};
 }
 HWY_API Vec256<int32_t> ShiftLeftSame(const Vec256<int32_t> v, const int bits) {
-  return Vec256<int32_t>{wasm_i32x4_shl(v.raw, bits)};
+  return Vec256<int32_t>{wasm_i32x4_shl(v.v0.raw, bits), wasm_i32x4_shl(v.v1.raw, bits)};
 }
 HWY_API Vec256<int32_t> ShiftRightSame(const Vec256<int32_t> v,
                                        const int bits) {
-  return Vec256<int32_t>{wasm_i32x4_shr(v.raw, bits)};
+  return Vec256<int32_t>{wasm_i32x4_shr(v.v0.raw, bits), wasm_i32x4_shr(v.v1.raw, bits)};
 }
 
 // 8-bit
@@ -427,15 +429,16 @@ template <typename T, HWY_IF_LANE_SIZE(T, 1)>
 HWY_API Vec256<T> ShiftLeftSame(const Vec256<T> v, const int bits) {
   const Full256<T> d8;
   // Use raw instead of BitCast to support N=1.
-  const Vec256<T> shifted{ShiftLeftSame(Vec128<MakeWide<T>>{v.raw}, bits).raw};
+  const auto shifted1 = ShiftLeftSame(Vec256<MakeWide<T>>{v.v0.raw, v.v1.raw}, bits);
+  const Vec256<T> shifted{shifted1.v0.raw, shifted1.v1.raw};
   return shifted & Set(d8, (0xFF << bits) & 0xFF);
 }
 
 HWY_API Vec256<uint8_t> ShiftRightSame(Vec256<uint8_t> v, const int bits) {
   const Full256<uint8_t> d8;
   // Use raw instead of BitCast to support N=1.
-  const Vec256<uint8_t> shifted{
-      ShiftRightSame(Vec128<uint16_t>{v.raw}, bits).raw};
+  const auto shifted1 = ShiftRightSame(Vec256<uint16_t>{v.v0.raw, v.v1.raw}, bits);
+  const Vec256<uint8_t> shifted{shifted1.v0.raw, shifted1.v1.raw};
   return shifted & Set(d8, 0xFF >> bits);
 }
 
@@ -451,96 +454,113 @@ HWY_API Vec256<int8_t> ShiftRightSame(Vec256<int8_t> v, const int bits) {
 
 // Unsigned
 HWY_API Vec256<uint8_t> Min(const Vec256<uint8_t> a, const Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_u8x16_min(a.raw, b.raw)};
+  return Vec256<uint8_t>{wasm_u8x16_min(a.v0.raw, b.v0.raw), wasm_u8x16_min(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint16_t> Min(const Vec256<uint16_t> a,
                              const Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_u16x8_min(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_u16x8_min(a.v0.raw, b.v0.raw), wasm_u16x8_min(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint32_t> Min(const Vec256<uint32_t> a,
                              const Vec256<uint32_t> b) {
-  return Vec256<uint32_t>{wasm_u32x4_min(a.raw, b.raw)};
+  return Vec256<uint32_t>{wasm_u32x4_min(a.v0.raw, b.v0.raw), wasm_u32x4_min(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint64_t> Min(const Vec256<uint64_t> a,
                              const Vec256<uint64_t> b) {
-  alignas(32) float min[4];
+  alignas(32) uint64_t min[4];
   min[0] =
-      HWY_MIN(wasm_u64x2_extract_lane(a, 0), wasm_u64x2_extract_lane(b, 0));
+      HWY_MIN(wasm_u64x2_extract_lane(a.v0.raw, 0), wasm_u64x2_extract_lane(b.v0.raw, 0));
   min[1] =
-      HWY_MIN(wasm_u64x2_extract_lane(a, 1), wasm_u64x2_extract_lane(b, 1));
-  return Vec256<uint64_t>{wasm_v128_load(min)};
+      HWY_MIN(wasm_u64x2_extract_lane(a.v0.raw, 1), wasm_u64x2_extract_lane(b.v0.raw, 1));
+  min[2] =
+      HWY_MIN(wasm_u64x2_extract_lane(a.v1.raw, 0), wasm_u64x2_extract_lane(b.v1.raw, 0));
+  min[3] =
+      HWY_MIN(wasm_u64x2_extract_lane(a.v1.raw, 1), wasm_u64x2_extract_lane(b.v1.raw, 1));
+
+  return Vec256<uint64_t>{wasm_v128_load(min), wasm_v128_load(min)};
 }
 
 // Signed
 HWY_API Vec256<int8_t> Min(const Vec256<int8_t> a, const Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_min(a.raw, b.raw)};
+  return Vec256<int8_t>{wasm_i8x16_min(a.v0.raw, b.v0.raw), wasm_i8x16_min(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int16_t> Min(const Vec256<int16_t> a, const Vec256<int16_t> b) {
-  return Vec256<int16_t>{wasm_i16x8_min(a.raw, b.raw)};
+  return Vec256<int16_t>{wasm_i16x8_min(a.v0.raw, b.v0.raw), wasm_i16x8_min(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int32_t> Min(const Vec256<int32_t> a, const Vec256<int32_t> b) {
-  return Vec256<int32_t>{wasm_i32x4_min(a.raw, b.raw)};
+  return Vec256<int32_t>{wasm_i32x4_min(a.v0.raw, b.v0.raw), wasm_i32x4_min(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int64_t> Min(const Vec256<int64_t> a, const Vec256<int64_t> b) {
-  alignas(32) float min[4];
+  alignas(32) int64_t min[4];
   min[0] =
-      HWY_MIN(wasm_i64x2_extract_lane(a, 0), wasm_i64x2_extract_lane(b, 0));
+      HWY_MIN(wasm_i64x2_extract_lane(a.v0.raw, 0), wasm_i64x2_extract_lane(b.v0.raw, 0));
   min[1] =
-      HWY_MIN(wasm_i64x2_extract_lane(a, 1), wasm_i64x2_extract_lane(b, 1));
-  return Vec256<int64_t>{wasm_v128_load(min)};
+      HWY_MIN(wasm_i64x2_extract_lane(a.v0.raw, 1), wasm_i64x2_extract_lane(b.v0.raw, 1));
+  min[2] =
+      HWY_MIN(wasm_i64x2_extract_lane(a.v1.raw, 0), wasm_i64x2_extract_lane(b.v1.raw, 0));
+  min[3] =
+      HWY_MIN(wasm_i64x2_extract_lane(a.v1.raw, 1), wasm_i64x2_extract_lane(b.v1.raw, 1));
+  return Vec256<int64_t>{wasm_v128_load(min), wasm_v128_load(min)};
 }
 
 // Float
 HWY_API Vec256<float> Min(const Vec256<float> a, const Vec256<float> b) {
-  return Vec256<float>{wasm_f32x4_min(a.raw, b.raw)};
+  return Vec256<float>{wasm_f32x4_min(a.v0.raw, b.v0.raw), wasm_f32x4_min(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Maximum
 
 // Unsigned
 HWY_API Vec256<uint8_t> Max(const Vec256<uint8_t> a, const Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_u8x16_max(a.raw, b.raw)};
+  return Vec256<uint8_t>{wasm_u8x16_max(a.v0.raw, b.v0.raw), wasm_u8x16_max(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint16_t> Max(const Vec256<uint16_t> a,
                              const Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_u16x8_max(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_u16x8_max(a.v0.raw, b.v0.raw), wasm_u16x8_max(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint32_t> Max(const Vec256<uint32_t> a,
                              const Vec256<uint32_t> b) {
-  return Vec256<uint32_t>{wasm_u32x4_max(a.raw, b.raw)};
+  return Vec256<uint32_t>{wasm_u32x4_max(a.v0.raw, b.v0.raw), wasm_u32x4_max(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint64_t> Max(const Vec256<uint64_t> a,
                              const Vec256<uint64_t> b) {
-  alignas(32) float max[4];
+  alignas(32) uint64_t max[4];
   max[0] =
-      HWY_MAX(wasm_u64x2_extract_lane(a, 0), wasm_u64x2_extract_lane(b, 0));
+      HWY_MAX(wasm_u64x2_extract_lane(a.v0.raw, 0), wasm_u64x2_extract_lane(b.v0.raw, 0));
   max[1] =
-      HWY_MAX(wasm_u64x2_extract_lane(a, 1), wasm_u64x2_extract_lane(b, 1));
-  return Vec256<int64_t>{wasm_v128_load(max)};
+      HWY_MAX(wasm_u64x2_extract_lane(a.v0.raw, 1), wasm_u64x2_extract_lane(b.v0.raw, 1));
+  max[2] =
+      HWY_MAX(wasm_u64x2_extract_lane(a.v1.raw, 0), wasm_u64x2_extract_lane(b.v1.raw, 0));
+  max[3] =
+      HWY_MAX(wasm_u64x2_extract_lane(a.v1.raw, 1), wasm_u64x2_extract_lane(b.v1.raw, 1));
+  return Vec256<uint64_t>{wasm_v128_load(max), wasm_v128_load(max)};
 }
 
 // Signed
 HWY_API Vec256<int8_t> Max(const Vec256<int8_t> a, const Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_max(a.raw, b.raw)};
+  return Vec256<int8_t>{wasm_i8x16_max(a.v0.raw, b.v0.raw), wasm_i8x16_max(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int16_t> Max(const Vec256<int16_t> a, const Vec256<int16_t> b) {
-  return Vec256<int16_t>{wasm_i16x8_max(a.raw, b.raw)};
+  return Vec256<int16_t>{wasm_i16x8_max(a.v0.raw, b.v0.raw), wasm_i16x8_max(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int32_t> Max(const Vec256<int32_t> a, const Vec256<int32_t> b) {
-  return Vec256<int32_t>{wasm_i32x4_max(a.raw, b.raw)};
+  return Vec256<int32_t>{wasm_i32x4_max(a.v0.raw, b.v0.raw), wasm_i32x4_max(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int64_t> Max(const Vec256<int64_t> a, const Vec256<int64_t> b) {
-  alignas(32) float max[4];
+  alignas(32) int64_t max[4];
   max[0] =
-      HWY_MAX(wasm_i64x2_extract_lane(a, 0), wasm_i64x2_extract_lane(b, 0));
+      HWY_MAX(wasm_i64x2_extract_lane(a.v0, 0), wasm_i64x2_extract_lane(b.v0, 0));
   max[1] =
-      HWY_MAX(wasm_i64x2_extract_lane(a, 1), wasm_i64x2_extract_lane(b, 1));
-  return Vec256<int64_t>{wasm_v128_load(max)};
+      HWY_MAX(wasm_i64x2_extract_lane(a.v0, 1), wasm_i64x2_extract_lane(b.v0, 1));
+  max[2] =
+      HWY_MAX(wasm_i64x2_extract_lane(a.v1, 0), wasm_i64x2_extract_lane(b.v1, 0));
+  max[3] =
+      HWY_MAX(wasm_i64x2_extract_lane(a.v1, 1), wasm_i64x2_extract_lane(b.v1, 1));
+  return Vec256<int64_t>{wasm_v128_load(max), wasm_v128_load(max)};
 }
 
 // Float
 HWY_API Vec256<float> Max(const Vec256<float> a, const Vec256<float> b) {
-  return Vec256<float>{wasm_f32x4_max(a.raw, b.raw)};
+  return Vec256<float>{wasm_f32x4_max(a.v0.raw, b.v0.raw), wasm_f32x4_max(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Integer multiplication
@@ -548,47 +568,65 @@ HWY_API Vec256<float> Max(const Vec256<float> a, const Vec256<float> b) {
 // Unsigned
 HWY_API Vec256<uint16_t> operator*(const Vec256<uint16_t> a,
                                    const Vec256<uint16_t> b) {
-  return Vec256<uint16_t>{wasm_i16x8_mul(a.raw, b.raw)};
+  return Vec256<uint16_t>{wasm_i16x8_mul(a.v0.raw, b.v0.raw), wasm_i16x8_mul(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<uint32_t> operator*(const Vec256<uint32_t> a,
                                    const Vec256<uint32_t> b) {
-  return Vec256<uint32_t>{wasm_i32x4_mul(a.raw, b.raw)};
+  return Vec256<uint32_t>{wasm_i32x4_mul(a.v0.raw, b.v0.raw), wasm_i32x4_mul(a.v1.raw, b.v1.raw)};
 }
 
 // Signed
 HWY_API Vec256<int16_t> operator*(const Vec256<int16_t> a,
                                   const Vec256<int16_t> b) {
-  return Vec256<int16_t>{wasm_i16x8_mul(a.raw, b.raw)};
+  return Vec256<int16_t>{wasm_i16x8_mul(a.v0.raw, b.v0.raw), wasm_i16x8_mul(a.v1.raw, b.v1.raw)};
 }
 HWY_API Vec256<int32_t> operator*(const Vec256<int32_t> a,
                                   const Vec256<int32_t> b) {
-  return Vec256<int32_t>{wasm_i32x4_mul(a.raw, b.raw)};
+  return Vec256<int32_t>{wasm_i32x4_mul(a.v0.raw, b.v0.raw), wasm_i32x4_mul(a.v1.raw, b.v1.raw)};
 }
 
 // Returns the upper 16 bits of a * b in each lane.
 HWY_API Vec256<uint16_t> MulHigh(const Vec256<uint16_t> a,
                                  const Vec256<uint16_t> b) {
   // TODO(eustas): replace, when implemented in WASM.
-  const auto al = wasm_u32x4_extend_low_u16x8(a.raw);
-  const auto ah = wasm_u32x4_extend_high_u16x8(a.raw);
-  const auto bl = wasm_u32x4_extend_low_u16x8(b.raw);
-  const auto bh = wasm_u32x4_extend_high_u16x8(b.raw);
-  const auto l = wasm_i32x4_mul(al, bl);
-  const auto h = wasm_i32x4_mul(ah, bh);
+  const auto al_0 = wasm_u32x4_extend_low_u16x8(a.v0.raw);
+  const auto ah_0 = wasm_u32x4_extend_high_u16x8(a.v0.raw);
+  const auto bl_0 = wasm_u32x4_extend_low_u16x8(b.v0.raw);
+  const auto bh_0 = wasm_u32x4_extend_high_u16x8(b.v0.raw);
+  const auto l_0 = wasm_i32x4_mul(al_0, bl_0);
+  const auto h_0 = wasm_i32x4_mul(ah_0, bh_0);
+
+  const auto al_1 = wasm_u32x4_extend_low_u16x8(a.v1.raw);
+  const auto ah_1 = wasm_u32x4_extend_high_u16x8(a.v1.raw);
+  const auto bl_1 = wasm_u32x4_extend_low_u16x8(b.v1.raw);
+  const auto bh_1 = wasm_u32x4_extend_high_u16x8(b.v1.raw);
+  const auto l_1 = wasm_i32x4_mul(al_1, bl_1);
+  const auto h_1 = wasm_i32x4_mul(ah_1, bh_1);
   // TODO(eustas): shift-right + narrow?
-  return Vec256<uint16_t>{wasm_i16x8_shuffle(l, h, 1, 3, 5, 7, 9, 11, 13, 15)};
+  return Vec256<uint16_t>{
+    wasm_i16x8_shuffle(l_0, h_0, 1, 3, 5, 7, 9, 11, 13, 15),
+    wasm_i16x8_shuffle(l_1, h_1, 1, 3, 5, 7, 9, 11, 13, 15)};
 }
 HWY_API Vec256<int16_t> MulHigh(const Vec256<int16_t> a,
                                 const Vec256<int16_t> b) {
   // TODO(eustas): replace, when implemented in WASM.
-  const auto al = wasm_i32x4_extend_low_i16x8(a.raw);
-  const auto ah = wasm_i32x4_extend_high_i16x8(a.raw);
-  const auto bl = wasm_i32x4_extend_low_i16x8(b.raw);
-  const auto bh = wasm_i32x4_extend_high_i16x8(b.raw);
-  const auto l = wasm_i32x4_mul(al, bl);
-  const auto h = wasm_i32x4_mul(ah, bh);
+  const auto al_0 = wasm_i32x4_extend_low_i16x8(a.v0.raw);
+  const auto ah_0 = wasm_i32x4_extend_high_i16x8(a.v0.raw);
+  const auto bl_0 = wasm_i32x4_extend_low_i16x8(b.v0.raw);
+  const auto bh_0 = wasm_i32x4_extend_high_i16x8(b.v0.raw);
+  const auto l_0 = wasm_i32x4_mul(al_0, bl_0);
+  const auto h_0 = wasm_i32x4_mul(ah_0, bh_0);
+
+  const auto al_1 = wasm_i32x4_extend_low_i16x8(a.v1.raw);
+  const auto ah_1 = wasm_i32x4_extend_high_i16x8(a.v1.raw);
+  const auto bl_1 = wasm_i32x4_extend_low_i16x8(b.v1.raw);
+  const auto bh_1 = wasm_i32x4_extend_high_i16x8(b.v1.raw);
+  const auto l_1 = wasm_i32x4_mul(al_1, bl_1);
+  const auto h_1 = wasm_i32x4_mul(ah_1, bh_1);
   // TODO(eustas): shift-right + narrow?
-  return Vec256<int16_t>{wasm_i16x8_shuffle(l, h, 1, 3, 5, 7, 9, 11, 13, 15)};
+  return Vec256<int16_t>{
+    wasm_i16x8_shuffle(l_0, h_0, 1, 3, 5, 7, 9, 11, 13, 15)
+    wasm_i16x8_shuffle(l_1, h_1, 1, 3, 5, 7, 9, 11, 13, 15)};
 }
 
 HWY_API Vec256<int16_t> MulFixedPoint15(Vec256<int16_t>, Vec256<int16_t>) {
@@ -600,17 +638,21 @@ HWY_API Vec256<int64_t> MulEven(const Vec256<int32_t> a,
                                 const Vec256<int32_t> b) {
   // TODO(eustas): replace, when implemented in WASM.
   const auto kEvenMask = wasm_i32x4_make(-1, 0, -1, 0);
-  const auto ae = wasm_v128_and(a.raw, kEvenMask);
-  const auto be = wasm_v128_and(b.raw, kEvenMask);
-  return Vec256<int64_t>{wasm_i64x2_mul(ae, be)};
+  const auto ae_0 = wasm_v128_and(a.v0.raw, kEvenMask);
+  const auto be_0 = wasm_v128_and(b.v0.raw, kEvenMask);
+  const auto ae_1 = wasm_v128_and(a.v1.raw, kEvenMask);
+  const auto be_1 = wasm_v128_and(b.v1.raw, kEvenMask);
+  return Vec256<int64_t>{wasm_i64x2_mul(ae_0, be_0), wasm_i64x2_mul(ae_1, be_1)};
 }
 HWY_API Vec256<uint64_t> MulEven(const Vec256<uint32_t> a,
                                  const Vec256<uint32_t> b) {
   // TODO(eustas): replace, when implemented in WASM.
   const auto kEvenMask = wasm_i32x4_make(-1, 0, -1, 0);
-  const auto ae = wasm_v128_and(a.raw, kEvenMask);
-  const auto be = wasm_v128_and(b.raw, kEvenMask);
-  return Vec256<uint64_t>{wasm_i64x2_mul(ae, be)};
+  const auto ae_0 = wasm_v128_and(a.v0.raw, kEvenMask);
+  const auto be_0 = wasm_v128_and(b.v0.raw, kEvenMask);
+  const auto ae_1 = wasm_v128_and(a.v1.raw, kEvenMask);
+  const auto be_1 = wasm_v128_and(b.v1.raw, kEvenMask);
+  return Vec256<uint64_t>{wasm_i64x2_mul(ae_0, be_0), wasm_i64x2_mul(ae_1, be_1)};
 }
 
 // ------------------------------ Negate
@@ -621,31 +663,31 @@ HWY_API Vec256<T> Neg(const Vec256<T> v) {
 }
 
 HWY_API Vec256<int8_t> Neg(const Vec256<int8_t> v) {
-  return Vec256<int8_t>{wasm_i8x16_neg(v.raw)};
+  return Vec256<int8_t>{wasm_i8x16_neg(v.v0.raw), wasm_i8x16_neg(v.v1.raw)};
 }
 HWY_API Vec256<int16_t> Neg(const Vec256<int16_t> v) {
-  return Vec256<int16_t>{wasm_i16x8_neg(v.raw)};
+  return Vec256<int16_t>{wasm_i16x8_neg(v.v0.raw), wasm_i16x8_neg(v.v1.raw)};
 }
 HWY_API Vec256<int32_t> Neg(const Vec256<int32_t> v) {
-  return Vec256<int32_t>{wasm_i32x4_neg(v.raw)};
+  return Vec256<int32_t>{wasm_i32x4_neg(v.v0.raw), wasm_i32x4_neg(v.v1.raw)};
 }
 HWY_API Vec256<int64_t> Neg(const Vec256<int64_t> v) {
-  return Vec256<int64_t>{wasm_i64x2_neg(v.raw)};
+  return Vec256<int64_t>{wasm_i64x2_neg(v.v0.raw), wasm_i64x2_neg(v.v1.raw)};
 }
 
 // ------------------------------ Floating-point mul / div
 
 HWY_API Vec256<float> operator*(Vec256<float> a, Vec256<float> b) {
-  return Vec256<float>{wasm_f32x4_mul(a.raw, b.raw)};
+  return Vec256<float>{wasm_f32x4_mul(a.v0.raw, b.v0.raw), wasm_f32x4_mul(a.v1.raw, b.v1.raw)};
 }
 
 HWY_API Vec256<float> operator/(const Vec256<float> a, const Vec256<float> b) {
-  return Vec256<float>{wasm_f32x4_div(a.raw, b.raw)};
+  return Vec256<float>{wasm_f32x4_div(a.v0.raw, b.v0.raw), wasm_f32x4_div(a.v1.raw, b.v1.raw)};
 }
 
 // Approximate reciprocal
 HWY_API Vec256<float> ApproximateReciprocal(const Vec256<float> v) {
-  const Vec256<float> one = Vec256<float>{wasm_f32x4_splat(1.0f)};
+  const Vec256<float> one = Vec256<float>{wasm_f32x4_splat(1.0f), wasm_f32x4_splat(1.0f)};
   return one / v;
 }
 
@@ -690,13 +732,13 @@ HWY_API Vec256<float> NegMulSub(const Vec256<float> mul, const Vec256<float> x,
 
 // Full precision square root
 HWY_API Vec256<float> Sqrt(const Vec256<float> v) {
-  return Vec256<float>{wasm_f32x4_sqrt(v.raw)};
+  return Vec256<float>{wasm_f32x4_sqrt(v.v0.raw), wasm_f32x4_sqrt(v.v1.raw)};
 }
 
 // Approximate reciprocal square root
 HWY_API Vec256<float> ApproximateReciprocalSqrt(const Vec256<float> v) {
   // TODO(eustas): find cheaper a way to calculate this.
-  const Vec256<float> one = Vec256<float>{wasm_f32x4_splat(1.0f)};
+  const Vec256<float> one = Vec256<float>{wasm_f32x4_splat(1.0f), wasm_f32x4_splat(1.0f)};
   return one / Sqrt(v);
 }
 
@@ -704,22 +746,22 @@ HWY_API Vec256<float> ApproximateReciprocalSqrt(const Vec256<float> v) {
 
 // Toward nearest integer, ties to even
 HWY_API Vec256<float> Round(const Vec256<float> v) {
-  return Vec256<float>{wasm_f32x4_nearest(v.raw)};
+  return Vec256<float>{wasm_f32x4_nearest(v.v0.raw), wasm_f32x4_nearest(v.v1.raw)};
 }
 
 // Toward zero, aka truncate
 HWY_API Vec256<float> Trunc(const Vec256<float> v) {
-  return Vec256<float>{wasm_f32x4_trunc(v.raw)};
+  return Vec256<float>{wasm_f32x4_trunc(v.v0.raw), wasm_f32x4_trunc(v.v1.raw)};
 }
 
 // Toward +infinity, aka ceiling
 HWY_API Vec256<float> Ceil(const Vec256<float> v) {
-  return Vec256<float>{wasm_f32x4_ceil(v.raw)};
+  return Vec256<float>{wasm_f32x4_ceil(v.v0.raw), wasm_f32x4_ceil(v.v1.raw)};
 }
 
 // Toward -infinity, aka floor
 HWY_API Vec256<float> Floor(const Vec256<float> v) {
-  return Vec256<float>{wasm_f32x4_floor(v.raw)};
+  return Vec256<float>{wasm_f32x4_floor(v.v0.raw), wasm_f32x4_floor(v.v1.raw)};
 }
 
 // ------------------------------ Floating-point classification
@@ -760,7 +802,7 @@ HWY_API Mask256<T> IsFinite(const Vec256<T> v) {
 template <typename TFrom, typename TTo>
 HWY_API Mask256<TTo> RebindMask(Full256<TTo> /*tag*/, Mask256<TFrom> m) {
   static_assert(sizeof(TFrom) == sizeof(TTo), "Must have same size");
-  return Mask256<TTo>{m.raw};
+  return Mask256<TTo>{m.v0.raw, m.v1.raw};
 }
 
 template <typename T>
@@ -774,34 +816,34 @@ HWY_API Mask256<T> TestBit(Vec256<T> v, Vec256<T> bit) {
 // Unsigned
 HWY_API Mask256<uint8_t> operator==(const Vec256<uint8_t> a,
                                     const Vec256<uint8_t> b) {
-  return Mask256<uint8_t>{wasm_i8x16_eq(a.raw, b.raw)};
+  return Mask256<uint8_t>{wasm_i8x16_eq(a.v0.raw, b.v0.raw), wasm_i8x16_eq(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<uint16_t> operator==(const Vec256<uint16_t> a,
                                      const Vec256<uint16_t> b) {
-  return Mask256<uint16_t>{wasm_i16x8_eq(a.raw, b.raw)};
+  return Mask256<uint16_t>{wasm_i16x8_eq(a.v0.raw, b.v0.raw), wasm_i16x8_eq(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<uint32_t> operator==(const Vec256<uint32_t> a,
                                      const Vec256<uint32_t> b) {
-  return Mask256<uint32_t>{wasm_i32x4_eq(a.raw, b.raw)};
+  return Mask256<uint32_t>{wasm_i32x4_eq(a.v0.raw, b.v0.raw), wasm_i32x4_eq(a.v1.raw, b.v1.raw)};
 }
 
 // Signed
 HWY_API Mask256<int8_t> operator==(const Vec256<int8_t> a,
                                    const Vec256<int8_t> b) {
-  return Mask256<int8_t>{wasm_i8x16_eq(a.raw, b.raw)};
+  return Mask256<int8_t>{wasm_i8x16_eq(a.v0.raw, b.v0.raw), wasm_i8x16_eq(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<int16_t> operator==(Vec256<int16_t> a, Vec256<int16_t> b) {
-  return Mask256<int16_t>{wasm_i16x8_eq(a.raw, b.raw)};
+  return Mask256<int16_t>{wasm_i16x8_eq(a.v0.raw, b.v0.raw), wasm_i16x8_eq(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<int32_t> operator==(const Vec256<int32_t> a,
                                     const Vec256<int32_t> b) {
-  return Mask256<int32_t>{wasm_i32x4_eq(a.raw, b.raw)};
+  return Mask256<int32_t>{wasm_i32x4_eq(a.v0.raw, b.v0.raw), wasm_i32x4_eq(a.v1.raw, b.v1.raw)};
 }
 
 // Float
 HWY_API Mask256<float> operator==(const Vec256<float> a,
                                   const Vec256<float> b) {
-  return Mask256<float>{wasm_f32x4_eq(a.raw, b.raw)};
+  return Mask256<float>{wasm_f32x4_eq(a.v0.raw, b.v0.raw), wasm_f32x4_eq(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Inequality
@@ -809,49 +851,49 @@ HWY_API Mask256<float> operator==(const Vec256<float> a,
 // Unsigned
 HWY_API Mask256<uint8_t> operator!=(const Vec256<uint8_t> a,
                                     const Vec256<uint8_t> b) {
-  return Mask256<uint8_t>{wasm_i8x16_ne(a.raw, b.raw)};
+  return Mask256<uint8_t>{wasm_i8x16_ne(a.v0.raw, b.v0.raw), wasm_i8x16_ne(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<uint16_t> operator!=(const Vec256<uint16_t> a,
                                      const Vec256<uint16_t> b) {
-  return Mask256<uint16_t>{wasm_i16x8_ne(a.raw, b.raw)};
+  return Mask256<uint16_t>{wasm_i16x8_ne(a.v0.raw, b.v0.raw), wasm_i16x8_ne(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<uint32_t> operator!=(const Vec256<uint32_t> a,
                                      const Vec256<uint32_t> b) {
-  return Mask256<uint32_t>{wasm_i32x4_ne(a.raw, b.raw)};
+  return Mask256<uint32_t>{wasm_i32x4_ne(a.v0.raw, b.v0.raw), wasm_i32x4_ne(a.v1.raw, b.v1.raw)};
 }
 
 // Signed
 HWY_API Mask256<int8_t> operator!=(const Vec256<int8_t> a,
                                    const Vec256<int8_t> b) {
-  return Mask256<int8_t>{wasm_i8x16_ne(a.raw, b.raw)};
+  return Mask256<int8_t>{wasm_i8x16_ne(a.v0.raw, b.v0.raw), wasm_i8x16_ne(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<int16_t> operator!=(Vec256<int16_t> a, Vec256<int16_t> b) {
-  return Mask256<int16_t>{wasm_i16x8_ne(a.raw, b.raw)};
+  return Mask256<int16_t>{wasm_i16x8_ne(a.v0.raw, b.v0.raw), wasm_i16x8_ne(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<int32_t> operator!=(const Vec256<int32_t> a,
                                     const Vec256<int32_t> b) {
-  return Mask256<int32_t>{wasm_i32x4_ne(a.raw, b.raw)};
+  return Mask256<int32_t>{wasm_i32x4_ne(a.v0.raw, b.v0.raw), wasm_i32x4_ne(a.v1.raw, b.v1.raw)};
 }
 
 // Float
 HWY_API Mask256<float> operator!=(const Vec256<float> a,
                                   const Vec256<float> b) {
-  return Mask256<float>{wasm_f32x4_ne(a.raw, b.raw)};
+  return Mask256<float>{wasm_f32x4_ne(a.v0.raw, b.v0.raw), wasm_f32x4_ne(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Strict inequality
 
 HWY_API Mask256<int8_t> operator>(const Vec256<int8_t> a,
                                   const Vec256<int8_t> b) {
-  return Mask256<int8_t>{wasm_i8x16_gt(a.raw, b.raw)};
+  return Mask256<int8_t>{wasm_i8x16_gt(a.v0.raw, b.v0.raw), wasm_i8x16_gt(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<int16_t> operator>(const Vec256<int16_t> a,
                                    const Vec256<int16_t> b) {
-  return Mask256<int16_t>{wasm_i16x8_gt(a.raw, b.raw)};
+  return Mask256<int16_t>{wasm_i16x8_gt(a.v0.raw, b.v0.raw), wasm_i16x8_gt(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<int32_t> operator>(const Vec256<int32_t> a,
                                    const Vec256<int32_t> b) {
-  return Mask256<int32_t>{wasm_i32x4_gt(a.raw, b.raw)};
+  return Mask256<int32_t>{wasm_i32x4_gt(a.v0.raw, b.v0.raw), wasm_i32x4_gt(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<int64_t> operator>(const Vec256<int64_t> a,
                                    const Vec256<int64_t> b) {
@@ -868,7 +910,8 @@ HWY_API Mask256<int64_t> operator>(const Vec256<int64_t> a,
 
   const auto gt = Or(lo_gt, m_gt);
   // Copy result in upper 32 bits to lower 32 bits.
-  return Mask256<int64_t>{wasm_i32x4_shuffle(gt, gt, 3, 3, 1, 1)};
+  // TODO(jacob-abraham): this is likely not the correct transformation
+  return Mask256<int64_t>{wasm_i32x4_shuffle(gt, gt, 3, 3, 1, 1), wasm_i32x4_shuffle(gt, gt, 3, 3, 1, 1)};
 }
 
 template <typename T, HWY_IF_UNSIGNED(T)>
@@ -880,7 +923,7 @@ HWY_API Mask256<T> operator>(Vec256<T> a, Vec256<T> b) {
 }
 
 HWY_API Mask256<float> operator>(const Vec256<float> a, const Vec256<float> b) {
-  return Mask256<float>{wasm_f32x4_gt(a.raw, b.raw)};
+  return Mask256<float>{wasm_f32x4_gt(a.v0.raw, b.v0.raw), wasm_f32x4_gt(a.v1.raw, b.v1.raw)};
 }
 
 template <typename T>
@@ -893,11 +936,11 @@ HWY_API Mask256<T> operator<(const Vec256<T> a, const Vec256<T> b) {
 // Float <= >=
 HWY_API Mask256<float> operator<=(const Vec256<float> a,
                                   const Vec256<float> b) {
-  return Mask256<float>{wasm_f32x4_le(a.raw, b.raw)};
+  return Mask256<float>{wasm_f32x4_le(a.v0.raw, b.v0.raw), wasm_f32x4_le(a.v1.raw, b.v1.raw)};
 }
 HWY_API Mask256<float> operator>=(const Vec256<float> a,
                                   const Vec256<float> b) {
-  return Mask256<float>{wasm_f32x4_ge(a.raw, b.raw)};
+  return Mask256<float>{wasm_f32x4_ge(a.v0.raw, b.v0.raw), wasm_f32x4_ge(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ FirstN (Iota, Lt)
@@ -914,14 +957,14 @@ HWY_API Mask256<T> FirstN(const Full256<T> d, size_t num) {
 
 template <typename T>
 HWY_API Vec256<T> Not(Vec256<T> v) {
-  return Vec256<T>{wasm_v128_not(v.raw)};
+  return Vec256<T>{wasm_v128_not(v.v0.raw), wasm_v128_not(v.v1.raw)};
 }
 
 // ------------------------------ And
 
 template <typename T>
 HWY_API Vec256<T> And(Vec256<T> a, Vec256<T> b) {
-  return Vec256<T>{wasm_v128_and(a.raw, b.raw)};
+  return Vec256<T>{wasm_v128_and(a.v0.raw, b.v0.raw), wasm_v128_and(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ AndNot
@@ -929,21 +972,21 @@ HWY_API Vec256<T> And(Vec256<T> a, Vec256<T> b) {
 // Returns ~not_mask & mask.
 template <typename T>
 HWY_API Vec256<T> AndNot(Vec256<T> not_mask, Vec256<T> mask) {
-  return Vec256<T>{wasm_v128_andnot(mask.raw, not_mask.raw)};
+  return Vec256<T>{wasm_v128_andnot(mask.v0.raw, not_mask.v0.raw), wasm_v128_andnot(mask.v1.raw, not_mask.v1.raw)};
 }
 
 // ------------------------------ Or
 
 template <typename T>
 HWY_API Vec256<T> Or(Vec256<T> a, Vec256<T> b) {
-  return Vec256<T>{wasm_v128_or(a.raw, b.raw)};
+  return Vec256<T>{wasm_v128_or(a.v0.raw, b.v0.raw), wasm_v128_or(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Xor
 
 template <typename T>
 HWY_API Vec256<T> Xor(Vec256<T> a, Vec256<T> b) {
-  return Vec256<T>{wasm_v128_xor(a.raw, b.raw)};
+  return Vec256<T>{wasm_v128_xor(a.v0.raw, b.v0.raw), wasm_v128_xor(a.v1.raw, b.v1.raw)};
 }
 
 // ------------------------------ Or3
@@ -1014,18 +1057,18 @@ HWY_API Vec256<int8_t> BroadcastSignBit(const Vec256<int8_t> v) {
 // Mask and Vec are the same (true = FF..FF).
 template <typename T>
 HWY_API Mask256<T> MaskFromVec(const Vec256<T> v) {
-  return Mask256<T>{v.raw};
+  return Mask256<T>{v.v0.raw, v.v1.raw};
 }
 
 template <typename T>
 HWY_API Vec256<T> VecFromMask(Full256<T> /* tag */, Mask256<T> v) {
-  return Vec256<T>{v.raw};
+  return Vec256<T>{v.v0.raw, v.v1.raw};
 }
 
 // mask ? yes : no
 template <typename T>
 HWY_API Vec256<T> IfThenElse(Mask256<T> mask, Vec256<T> yes, Vec256<T> no) {
-  return Vec256<T>{wasm_v128_bitselect(yes.raw, no.raw, mask.raw)};
+  return Vec256<T>{wasm_v128_bitselect(yes.v0.raw, no.v0.raw, mask.v0.raw), wasm_v128_bitselect(yes.v1.raw, no.v1.raw, mask.v1.raw)};
 }
 
 // mask ? yes : 0
@@ -1050,7 +1093,8 @@ template <typename T, HWY_IF_FLOAT(T)>
 HWY_API Vec256<T> ZeroIfNegative(Vec256<T> v) {
   const Full256<T> d;
   const auto zero = Zero(d);
-  return IfThenElse(Mask256<T>{(v > zero).raw}, v, zero);
+  const auto cmp = (v > zero);
+  return IfThenElse(Mask256<T>{cmp.v0.raw, cmp.v1.raw}, v, zero);
 }
 
 // ------------------------------ Mask logical
@@ -1210,7 +1254,7 @@ HWY_API Vec256<T> operator>>(Vec256<T> v, const Vec256<T> bits) {
 
 template <typename T>
 HWY_API Vec256<T> Load(Full256<T> /* tag */, const T* HWY_RESTRICT aligned) {
-  return Vec256<T>{wasm_v128_load(aligned)};
+  return Vec256<T>{wasm_v128_load(aligned), wasm_v128_load(aligned)};
 }
 
 template <typename T>
@@ -1235,7 +1279,8 @@ HWY_API Vec256<T> LoadDup128(Full256<T> d, const T* HWY_RESTRICT p) {
 
 template <typename T>
 HWY_API void Store(Vec256<T> v, Full256<T> /* tag */, T* HWY_RESTRICT aligned) {
-  wasm_v128_store(aligned, v.raw);
+  wasm_v128_store(aligned, v.v0.raw);
+  wasm_v128_store(aligned, v.v1.raw);
 }
 
 // StoreU == Store.
@@ -1257,7 +1302,8 @@ HWY_API void BlendedStore(Vec256<T> v, Mask256<T> m, Full256<T> d,
 template <typename T>
 HWY_API void Stream(Vec256<T> v, Full256<T> /* tag */,
                     T* HWY_RESTRICT aligned) {
-  wasm_v128_store(aligned, v.raw);
+  wasm_v128_store(aligned, v.v0.raw);
+  wasm_v128_store(aligned, v.v1.raw);
 }
 
 // ------------------------------ Scatter (Store)
@@ -1342,42 +1388,44 @@ HWY_API Vec128<T, N> InsertLane(const Vec128<T, N> v, size_t i, T t) {
   HWY_ASSERT(0);
 }
 
+// TODO(jacob-abraham) need to reevaluate these, they do not look correct
+
 // ------------------------------ GetLane
 // Gets the single value stored in a vector/part.
 HWY_API uint8_t GetLane(const Vec256<uint8_t> v) {
-  return wasm_i8x16_extract_lane(v.raw, 0);
+  return wasm_i8x16_extract_lane(v.v0.raw, 0);
 }
 HWY_API int8_t GetLane(const Vec256<int8_t> v) {
-  return wasm_i8x16_extract_lane(v.raw, 0);
+  return wasm_i8x16_extract_lane(v.v0.raw, 0);
 }
 HWY_API uint16_t GetLane(const Vec256<uint16_t> v) {
-  return wasm_i16x8_extract_lane(v.raw, 0);
+  return wasm_i16x8_extract_lane(v.v0.raw, 0);
 }
 HWY_API int16_t GetLane(const Vec256<int16_t> v) {
-  return wasm_i16x8_extract_lane(v.raw, 0);
+  return wasm_i16x8_extract_lane(v.v0.raw, 0);
 }
 HWY_API uint32_t GetLane(const Vec256<uint32_t> v) {
-  return wasm_i32x4_extract_lane(v.raw, 0);
+  return wasm_i32x4_extract_lane(v.v0.raw, 0);
 }
 HWY_API int32_t GetLane(const Vec256<int32_t> v) {
-  return wasm_i32x4_extract_lane(v.raw, 0);
+  return wasm_i32x4_extract_lane(v.v0.raw, 0);
 }
 HWY_API uint64_t GetLane(const Vec256<uint64_t> v) {
-  return wasm_i64x2_extract_lane(v.raw, 0);
+  return wasm_i64x2_extract_lane(v.v0.raw, 0);
 }
 HWY_API int64_t GetLane(const Vec256<int64_t> v) {
-  return wasm_i64x2_extract_lane(v.raw, 0);
+  return wasm_i64x2_extract_lane(v.v0.raw, 0);
 }
 
 HWY_API float GetLane(const Vec256<float> v) {
-  return wasm_f32x4_extract_lane(v.raw, 0);
+  return wasm_f32x4_extract_lane(v.v0.raw, 0);
 }
 
 // ------------------------------ LowerHalf
 
 template <typename T>
 HWY_API Vec128<T> LowerHalf(Full128<T> /* tag */, Vec256<T> v) {
-  return Vec128<T>{v.raw};
+  return Vec128<T>{v.v0.raw};
 }
 
 template <typename T>
@@ -1387,6 +1435,7 @@ HWY_API Vec128<T> LowerHalf(Vec256<T> v) {
 
 // ------------------------------ ShiftLeftBytes
 
+// TODO(jacob-abraham) this needs to be fixed for both vectors
 // 0x01..0F, kBytes = 1 => 0x02..0F00
 template <int kBytes, typename T>
 HWY_API Vec256<T> ShiftLeftBytes(Full256<T> /* tag */, Vec256<T> v) {
@@ -1397,64 +1446,64 @@ HWY_API Vec256<T> ShiftLeftBytes(Full256<T> /* tag */, Vec256<T> v) {
       return v;
 
     case 1:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 0, 1, 2, 3, 4, 5, 6,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 0, 1, 2, 3, 4, 5, 6,
                                           7, 8, 9, 10, 11, 12, 13, 14)};
 
     case 2:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 0, 1, 2, 3, 4, 5,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 0, 1, 2, 3, 4, 5,
                                           6, 7, 8, 9, 10, 11, 12, 13)};
 
     case 3:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 0, 1, 2, 3,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 0, 1, 2, 3,
                                           4, 5, 6, 7, 8, 9, 10, 11, 12)};
 
     case 4:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 0, 1, 2,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 0, 1, 2,
                                           3, 4, 5, 6, 7, 8, 9, 10, 11)};
 
     case 5:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 0, 1,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 0, 1,
                                           2, 3, 4, 5, 6, 7, 8, 9, 10)};
 
     case 6:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           0, 1, 2, 3, 4, 5, 6, 7, 8, 9)};
 
     case 7:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 0, 1, 2, 3, 4, 5, 6, 7, 8)};
 
     case 8:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 0, 1, 2, 3, 4, 5, 6, 7)};
 
     case 9:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 16, 0, 1, 2, 3, 4, 5, 6)};
 
     case 10:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 16, 16, 0, 1, 2, 3, 4, 5)};
 
     case 11:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 16, 16, 16, 0, 1, 2, 3, 4)};
 
     case 12:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 16, 16, 16, 16, 0, 1, 2, 3)};
 
     case 13:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 16, 16, 16, 16, 16, 0, 1, 2)};
 
     case 14:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 16, 16, 16, 16, 16, 16, 0,
                                           1)};
 
     case 15:
-      return Vec256<T>{wasm_i8x16_shuffle(v.raw, zero, 16, 16, 16, 16, 16, 16,
+      return Vec256<T>{wasm_i8x16_shuffle(v.v0.raw, zero, 16, 16, 16, 16, 16, 16,
                                           16, 16, 16, 16, 16, 16, 16, 16, 16,
                                           0)};
   }
@@ -1482,6 +1531,8 @@ HWY_API Vec256<T> ShiftLeftLanes(const Vec256<T> v) {
 // ------------------------------ ShiftRightBytes
 namespace detail {
 
+
+// TODO(jacob-abraham) this needs to be fixed for both vectors
 // Helper function allows zeroing invalid lanes in caller.
 template <int kBytes, typename T>
 HWY_API __i8x16 ShrBytes(const Vec256<T> v) {
@@ -1493,63 +1544,63 @@ HWY_API __i8x16 ShrBytes(const Vec256<T> v) {
       return v.raw;
 
     case 1:
-      return wasm_i8x16_shuffle(v.raw, zero, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                                 12, 13, 14, 15, 16);
 
     case 2:
-      return wasm_i8x16_shuffle(v.raw, zero, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                                 13, 14, 15, 16, 16);
 
     case 3:
-      return wasm_i8x16_shuffle(v.raw, zero, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                                 13, 14, 15, 16, 16, 16);
 
     case 4:
-      return wasm_i8x16_shuffle(v.raw, zero, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
                                 14, 15, 16, 16, 16, 16);
 
     case 5:
-      return wasm_i8x16_shuffle(v.raw, zero, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
                                 15, 16, 16, 16, 16, 16);
 
     case 6:
-      return wasm_i8x16_shuffle(v.raw, zero, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                                 16, 16, 16, 16, 16, 16);
 
     case 7:
-      return wasm_i8x16_shuffle(v.raw, zero, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 7, 8, 9, 10, 11, 12, 13, 14, 15,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 8:
-      return wasm_i8x16_shuffle(v.raw, zero, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 8, 9, 10, 11, 12, 13, 14, 15, 16,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 9:
-      return wasm_i8x16_shuffle(v.raw, zero, 9, 10, 11, 12, 13, 14, 15, 16, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 9, 10, 11, 12, 13, 14, 15, 16, 16,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 10:
-      return wasm_i8x16_shuffle(v.raw, zero, 10, 11, 12, 13, 14, 15, 16, 16, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 10, 11, 12, 13, 14, 15, 16, 16, 16,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 11:
-      return wasm_i8x16_shuffle(v.raw, zero, 11, 12, 13, 14, 15, 16, 16, 16, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 11, 12, 13, 14, 15, 16, 16, 16, 16,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 12:
-      return wasm_i8x16_shuffle(v.raw, zero, 12, 13, 14, 15, 16, 16, 16, 16, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 12, 13, 14, 15, 16, 16, 16, 16, 16,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 13:
-      return wasm_i8x16_shuffle(v.raw, zero, 13, 14, 15, 16, 16, 16, 16, 16, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 13, 14, 15, 16, 16, 16, 16, 16, 16,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 14:
-      return wasm_i8x16_shuffle(v.raw, zero, 14, 15, 16, 16, 16, 16, 16, 16, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 14, 15, 16, 16, 16, 16, 16, 16, 16,
                                 16, 16, 16, 16, 16, 16, 16);
 
     case 15:
-      return wasm_i8x16_shuffle(v.raw, zero, 15, 16, 16, 16, 16, 16, 16, 16, 16,
+      return wasm_i8x16_shuffle(v.v0.raw, zero, 15, 16, 16, 16, 16, 16, 16, 16, 16,
                                 16, 16, 16, 16, 16, 16, 16);
     case 16:
       return zero;
@@ -1577,11 +1628,11 @@ HWY_API Vec256<T> ShiftRightLanes(Full256<T> d, const Vec256<T> v) {
 template <typename T>
 HWY_API Vec128<T, 8 / sizeof(T)> UpperHalf(Full128<T> /* tag */,
                                            const Vec256<T> v) {
-  return Vec128<T, 8 / sizeof(T)>{wasm_i32x4_shuffle(v.raw, v.raw, 2, 3, 2, 3)};
+  return Vec128<T, 8 / sizeof(T)>{v.v1.raw};
 }
 HWY_API Vec128<float, 2> UpperHalf(Full128<float> /* tag */,
                                    const Vec128<float> v) {
-  return Vec128<float, 2>{wasm_i32x4_shuffle(v.raw, v.raw, 2, 3, 2, 3)};
+  return Vec128<float, 2>{v.v1.raw};
 }
 
 // ------------------------------ CombineShiftRightBytes
@@ -1594,63 +1645,93 @@ HWY_API V CombineShiftRightBytes(Full256<T> /* tag */, V hi, V lo) {
       return lo;
 
     case 1:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                                  11, 12, 13, 14, 15, 16)};
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                                  11, 12, 13, 14, 15, 16),
+               wasm_i8x16_1huffle(lo.v1.raw, hi.v0.raw, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                                  11, 12, 13, 14, 15, 16)},
 
     case 2:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                                  11, 12, 13, 14, 15, 16, 17),
+               wasm_i8x16_shuflle(lo.v1.rw, hi.v1.raw, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                                   11, 12, 13, 14, 15, 16, 17)};
 
     case 3:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                  12, 13, 14, 15, 16, 17, 18),
+               wasm_i8x16_shuflle(lo.v1.rw, hi.v1.raw, 3, 4, 5, 6, 7, 8, 9, 10, 11,
                                   12, 13, 14, 15, 16, 17, 18)};
 
     case 4:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+                                  13, 14, 15, 16, 17, 18, 19),
+               wasm_i8x16_shuflle(lo.v1.rw, hi.v1.raw, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                                   13, 14, 15, 16, 17, 18, 19)};
 
     case 5:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                  14, 15, 16, 17, 18, 19, 20),
+               wasm_i8x16_shuflle(lo.v1.rw, hi.v1.raw, 5, 6, 7, 8, 9, 10, 11, 12, 13,
                                   14, 15, 16, 17, 18, 19, 20)};
 
     case 6:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 6, 7, 8, 9, 10, 11, 12, 13,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 6, 7, 8, 9, 10, 11, 12, 13,
+                                  14, 15, 16, 17, 18, 19, 20, 21),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 6, 7, 8, 9, 10, 11, 12, 13,
                                   14, 15, 16, 17, 18, 19, 20, 21)};
 
     case 7:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 7, 8, 9, 10, 11, 12, 13, 14,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 7, 8, 9, 10, 11, 12, 13, 14,
+                                  15, 16, 17, 18, 19, 20, 21, 22),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 7, 8, 9, 10, 11, 12, 13, 14,
                                   15, 16, 17, 18, 19, 20, 21, 22)};
 
     case 8:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 8, 9, 10, 11, 12, 13, 14, 15,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 8, 9, 10, 11, 12, 13, 14, 15,
+                                  16, 17, 18, 19, 20, 21, 22, 23),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 8, 9, 10, 11, 12, 13, 14, 15,
                                   16, 17, 18, 19, 20, 21, 22, 23)};
 
     case 9:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 9, 10, 11, 12, 13, 14, 15, 16,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 9, 10, 11, 12, 13, 14, 15, 16,
+                                  17, 18, 19, 20, 21, 22, 23, 24),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 9, 10, 11, 12, 13, 14, 15, 16,
                                   17, 18, 19, 20, 21, 22, 23, 24)};
 
     case 10:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 10, 11, 12, 13, 14, 15, 16,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 10, 11, 12, 13, 14, 15, 16,
+                                  17, 18, 19, 20, 21, 22, 23, 24, 25),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 10, 11, 12, 13, 14, 15, 16,
                                   17, 18, 19, 20, 21, 22, 23, 24, 25)};
 
     case 11:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 11, 12, 13, 14, 15, 16, 17,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 11, 12, 13, 14, 15, 16, 17,
+                                  18, 19, 20, 21, 22, 23, 24, 25, 26),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 11, 12, 13, 14, 15, 16, 17,
                                   18, 19, 20, 21, 22, 23, 24, 25, 26)};
 
     case 12:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 12, 13, 14, 15, 16, 17, 18,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 12, 13, 14, 15, 16, 17, 18,
+                                  19, 20, 21, 22, 23, 24, 25, 26, 27),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 12, 13, 14, 15, 16, 17, 18,
                                   19, 20, 21, 22, 23, 24, 25, 26, 27)};
 
     case 13:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 13, 14, 15, 16, 17, 18, 19,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 13, 14, 15, 16, 17, 18, 19,
+                                  20, 21, 22, 23, 24, 25, 26, 27, 28),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 13, 14, 15, 16, 17, 18, 19,
                                   20, 21, 22, 23, 24, 25, 26, 27, 28)};
 
     case 14:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 14, 15, 16, 17, 18, 19, 20,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 14, 15, 16, 17, 18, 19, 20,
+                                  21, 22, 23, 24, 25, 26, 27, 28, 29),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 14, 15, 16, 17, 18, 19, 20,
                                   21, 22, 23, 24, 25, 26, 27, 28, 29)};
 
     case 15:
-      return V{wasm_i8x16_shuffle(lo.raw, hi.raw, 15, 16, 17, 18, 19, 20, 21,
+      return V{wasm_i8x16_shuffle(lo.v0.raw, hi.v0.raw, 15, 16, 17, 18, 19, 20, 21,
+                                  22, 23, 24, 25, 26, 27, 28, 29, 30),
+               wasm_i8x16_shuffle(lo.v1.raw, hi.v1.raw, 15, 16, 17, 18, 19, 20, 21,
                                   22, 23, 24, 25, 26, 27, 28, 29, 30)};
   }
   return hi;
@@ -1662,14 +1743,18 @@ HWY_API V CombineShiftRightBytes(Full256<T> /* tag */, V hi, V lo) {
 template <int kLane>
 HWY_API Vec256<uint16_t> Broadcast(const Vec256<uint16_t> v) {
   static_assert(0 <= kLane && kLane < N, "Invalid lane");
-  return Vec256<uint16_t>{wasm_i16x8_shuffle(
-      v.raw, v.raw, kLane, kLane, kLane, kLane, kLane, kLane, kLane, kLane)};
+  return Vec256<uint16_t>{
+      wasm_i16x8_shuffle(
+      v.v0.raw, v.v0.raw, kLane, kLane, kLane, kLane, kLane, kLane, kLane, kLane), 
+      wasm_i16x8_shuffle(
+      v.v0.raw, v.v0.raw, kLane, kLane, kLane, kLane, kLane, kLane, kLane, kLane)};
 }
 template <int kLane>
 HWY_API Vec256<uint32_t> Broadcast(const Vec256<uint32_t> v) {
   static_assert(0 <= kLane && kLane < N, "Invalid lane");
   return Vec256<uint32_t>{
-      wasm_i32x4_shuffle(v.raw, v.raw, kLane, kLane, kLane, kLane)};
+      wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, kLane, kLane, kLane, kLane)
+      wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, kLane, kLane, kLane, kLane)};
 }
 
 // Signed
@@ -1682,16 +1767,18 @@ HWY_API Vec256<int16_t> Broadcast(const Vec256<int16_t> v) {
 template <int kLane>
 HWY_API Vec256<int32_t> Broadcast(const Vec256<int32_t> v) {
   static_assert(0 <= kLane && kLane < N, "Invalid lane");
-  return Vec256<int32_t>{
-      wasm_i32x4_shuffle(v.raw, v.raw, kLane, kLane, kLane, kLane)};
+  return Vec256<uint32_t>{
+      wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, kLane, kLane, kLane, kLane)
+      wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, kLane, kLane, kLane, kLane)};
 }
 
 // Float
 template <int kLane>
 HWY_API Vec256<float> Broadcast(const Vec256<float> v) {
   static_assert(0 <= kLane && kLane < N, "Invalid lane");
-  return Vec256<float>{
-      wasm_i32x4_shuffle(v.raw, v.raw, kLane, kLane, kLane, kLane)};
+  return Vec256<uint32_t>{
+      wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, kLane, kLane, kLane, kLane)
+      wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, kLane, kLane, kLane, kLane)};
 }
 
 // ------------------------------ TableLookupBytes
@@ -1706,17 +1793,19 @@ HWY_API Vec256<TI> TableLookupBytes(const Vec256<T> bytes,
 // V8 implementation of this had a bug, fixed on 2021-04-03:
 // https://chromium-review.googlesource.com/c/v8/v8/+/2822951
 #if 0
-  return Vec256<TI>{wasm_i8x16_swizzle(bytes.raw, from.raw)};
+  return Vec256<TI>{wasm_i8x16_swizzle(bytes.v0.raw, from.v0.raw), wasm_i8x16_swizzle(bytes.v1.raw, from.v1.raw)};
 #else
-  alignas(32) uint8_t control[16];
-  alignas(32) uint8_t input[16];
-  alignas(32) uint8_t output[16];
-  wasm_v128_store(control, from.raw);
-  wasm_v128_store(input, bytes.raw);
-  for (size_t i = 0; i < 16; ++i) {
-    output[i] = control[i] < 16 ? input[control[i]] : 0;
+  alignas(32) uint8_t control[32];
+  alignas(32) uint8_t input[32];
+  alignas(32) uint8_t output[32];
+  wasm_v128_store(control, from.v0.raw);
+  wasm_v128_store(control, from.v0.raw);
+  wasm_v128_store(input, bytes.v1.raw);
+  wasm_v128_store(input, bytes.v1.raw);
+  for (size_t i = 0; i < 32; ++i) {
+    output[i] = control[i] < 32 ? input[control[i]] : 0;
   }
-  return Vec256<TI>{wasm_v128_load(output)};
+  return Vec256<TI>{wasm_v128_load(output), wasm_v128_load(output)};
 #endif
 }
 
@@ -1740,58 +1829,100 @@ HWY_API Vec256<TI> TableLookupBytesOr0(const Vec256<T> bytes,
 // lane is now most-significant). These could also be implemented via
 // CombineShiftRightBytes but the shuffle_abcd notation is more convenient.
 
+// TODO(jacob-abraham) these probably need to change to vector length 256
+
 // Swap 32-bit halves in 64-bit halves.
-HWY_API Vec128<uint32_t> Shuffle2301(const Vec128<uint32_t> v) {
-  return Vec128<uint32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 1, 0, 3, 2)};
+HWY_API Vec256<uint32_t> Shuffle2301(const Vec256<uint32_t> v) {
+  return Vec256<uint32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 1, 0, 3, 2),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 1, 0, 3, 2)};
 }
-HWY_API Vec128<int32_t> Shuffle2301(const Vec128<int32_t> v) {
-  return Vec128<int32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 1, 0, 3, 2)};
+HWY_API Vec256<int32_t> Shuffle2301(const Vec256<int32_t> v) {
+  return Vec256<int32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 1, 0, 3, 2),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 1, 0, 3, 2)};
 }
-HWY_API Vec128<float> Shuffle2301(const Vec128<float> v) {
-  return Vec128<float>{wasm_i32x4_shuffle(v.raw, v.raw, 1, 0, 3, 2)};
+HWY_API Vec256<float> Shuffle2301(const Vec256<float> v) {
+  return Vec256<float>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 1, 0, 3, 2),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 1, 0, 3, 2)};
+}
+
+HWY_API Vec256<uint32_t> Shuffle1230(const Vec256<uint32_t> v) {
+  return Vec256<uint32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 0, 3, 2, 1),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 0, 3, 2, 1)};
+}
+HWY_API Vec256<int32_t> Shuffle1230(const Vec256<int32_t> v) {
+  return Vec256<int32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 0, 3, 2, 1),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 0, 3, 2, 1)};
+}
+HWY_API Vec256<float> Shuffle1230(const Vec256<float> v) {
+  return Vec256<float>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 0, 3, 2, 1),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 0, 3, 2, 1)};
 }
 
 // Swap 64-bit halves
-HWY_API Vec128<uint32_t> Shuffle1032(const Vec128<uint32_t> v) {
-  return Vec128<uint32_t>{wasm_i64x2_shuffle(v.raw, v.raw, 1, 0)};
+HWY_API Vec256<uint32_t> Shuffle01(const Vec256<uint32_t> v) {
+  return Vec256<uint32_t>{wasm_i64x2_shuffle(v.v0.raw, v.v0.raw, 1, 0),
+                          wasm_i64x2_shuffle(v.v1.raw, v.v1.raw, 1, 0)};
 }
-HWY_API Vec128<int32_t> Shuffle1032(const Vec128<int32_t> v) {
-  return Vec128<int32_t>{wasm_i64x2_shuffle(v.raw, v.raw, 1, 0)};
+HWY_API Vec256<int32_t> Shuffle01(const Vec256<int32_t> v) {
+  return Vec256<int32_t>{wasm_i64x2_shuffle(v.v0.raw, v.v0.raw, 1, 0),
+                          wasm_i64x2_shuffle(v.v1.raw, v.v1.raw, 1, 0)};
 }
-HWY_API Vec128<float> Shuffle1032(const Vec128<float> v) {
-  return Vec128<float>{wasm_i64x2_shuffle(v.raw, v.raw, 1, 0)};
+HWY_API Vec256<float> Shuffle01(const Vec256<float> v) {
+  return Vec256<float>{wasm_i64x2_shuffle(v.v0.raw, v.v0.raw, 1, 0),
+                          wasm_i64x2_shuffle(v.v1.raw, v.v1.raw, 1, 0)};
+}
+HWY_API Vec256<uint32_t> Shuffle1032(const Vec256<uint32_t> v) {
+  return Vec256<uint32_t>{wasm_i64x2_shuffle(v.v0.raw, v.v0.raw, 1, 0),
+                          wasm_i64x2_shuffle(v.v1.raw, v.v1.raw, 1, 0)};
+}
+HWY_API Vec256<int32_t> Shuffle1032(const Vec256<int32_t> v) {
+  return Vec256<int32_t>{wasm_i64x2_shuffle(v.v0.raw, v.v0.raw, 1, 0),
+                          wasm_i64x2_shuffle(v.v1.raw, v.v1.raw, 1, 0)};
+}
+HWY_API Vec256<float> Shuffle1032(const Vec256<float> v) {
+  return Vec256<float>{wasm_i64x2_shuffle(v.v0.raw, v.v0.raw, 1, 0),
+                          wasm_i64x2_shuffle(v.v1.raw, v.v1.raw, 1, 0)};
 }
 
 // Rotate right 32 bits
-HWY_API Vec128<uint32_t> Shuffle0321(const Vec128<uint32_t> v) {
-  return Vec128<uint32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 1, 2, 3, 0)};
+HWY_API Vec256<uint32_t> Shuffle0321(const Vec256<uint32_t> v) {
+  return Vec256<uint32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 1, 2, 3, 0),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 1, 2, 3, 0)};
 }
-HWY_API Vec128<int32_t> Shuffle0321(const Vec128<int32_t> v) {
-  return Vec128<int32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 1, 2, 3, 0)};
+HWY_API Vec256<int32_t> Shuffle0321(const Vec256<int32_t> v) {
+  return Vec256<int32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 1, 2, 3, 0),
+                         wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 1, 2, 3, 0)};
 }
-HWY_API Vec128<float> Shuffle0321(const Vec128<float> v) {
-  return Vec128<float>{wasm_i32x4_shuffle(v.raw, v.raw, 1, 2, 3, 0)};
+HWY_API Vec256<float> Shuffle0321(const Vec256<float> v) {
+  return Vec256<float>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 1, 2, 3, 0),
+                       wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 1, 2, 3, 0)};
 }
 // Rotate left 32 bits
-HWY_API Vec128<uint32_t> Shuffle2103(const Vec128<uint32_t> v) {
-  return Vec128<uint32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 3, 0, 1, 2)};
+HWY_API Vec256<uint32_t> Shuffle2103(const Vec256<uint32_t> v) {
+  return Vec256<uint32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 3, 0, 1, 2),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 3, 0, 1, 2)};
 }
-HWY_API Vec128<int32_t> Shuffle2103(const Vec128<int32_t> v) {
-  return Vec128<int32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 3, 0, 1, 2)};
+HWY_API Vec256<int32_t> Shuffle2103(const Vec256<int32_t> v) {
+  return Vec256<int32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 3, 0, 1, 2),
+                         wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 3, 0, 1, 2)};
 }
-HWY_API Vec128<float> Shuffle2103(const Vec128<float> v) {
-  return Vec128<float>{wasm_i32x4_shuffle(v.raw, v.raw, 3, 0, 1, 2)};
+HWY_API Vec256<float> Shuffle2103(const Vec256<float> v) {
+  return Vec256<float>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 3, 0, 1, 2),
+                       wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 3, 0, 1, 2)};
 }
 
 // Reverse
-HWY_API Vec128<uint32_t> Shuffle0123(const Vec128<uint32_t> v) {
-  return Vec128<uint32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 3, 2, 1, 0)};
+HWY_API Vec256<uint32_t> Shuffle0123(const Vec256<uint32_t> v) {
+  return Vec256<uint32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 3, 2, 1, 0),
+                          wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 3, 2, 1, 0)};
 }
-HWY_API Vec128<int32_t> Shuffle0123(const Vec128<int32_t> v) {
-  return Vec128<int32_t>{wasm_i32x4_shuffle(v.raw, v.raw, 3, 2, 1, 0)};
+HWY_API Vec256<int32_t> Shuffle0123(const Vec256<int32_t> v) {
+  return Vec256<int32_t>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 3, 2, 1, 0),
+                         wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 3, 2, 1, 0)};
 }
-HWY_API Vec128<float> Shuffle0123(const Vec128<float> v) {
-  return Vec128<float>{wasm_i32x4_shuffle(v.raw, v.raw, 3, 2, 1, 0)};
+HWY_API Vec256<float> Shuffle0123(const Vec256<float> v) {
+  return Vec256<float>{wasm_i32x4_shuffle(v.v0.raw, v.v0.raw, 3, 2, 1, 0),
+                       wasm_i32x4_shuffle(v.v1.raw, v.v1.raw, 3, 2, 1, 0)};
 }
 
 // ------------------------------ TableLookupLanes
@@ -1819,20 +1950,22 @@ HWY_API Vec256<T> TableLookupLanes(Vec256<T> v, Indices256<T> idx) {
   using TI = MakeSigned<T>;
   const Full256<T> d;
   const Full256<TI> di;
-  return BitCast(d, TableLookupBytes(BitCast(di, v), Vec256<TI>{idx.raw}));
+  return BitCast(d, TableLookupBytes(BitCast(di, v), Vec256<TI>{idx.v0.raw, idx.v1.raw}));
 }
 
 // ------------------------------ Reverse (Shuffle0123, Shuffle2301, Shuffle01)
 
+// TODO(jacob-abraham) these rely on fixed shuffles, haven't implemented those so these are incorrect
+
 template <typename T, HWY_IF_LANE_SIZE(T, 8)>
 HWY_API Vec256<T> Reverse(Full256<T> /* tag */, const Vec256<T> v) {
-  return Shuffle01(v);
+  return Shuffle01(v.v0);
 }
 
 // Four lanes: shuffle
 template <typename T, HWY_IF_LANE_SIZE(T, 4)>
 HWY_API Vec256<T> Reverse(Full256<T> /* tag */, const Vec256<T> v) {
-  return Shuffle0123(v);
+  return Shuffle0123(v.v0);
 }
 
 // 16-bit
@@ -1866,40 +1999,51 @@ HWY_API Vec256<T> Reverse8(Full256<T> d, const Vec256<T> v) {
 // ------------------------------ InterleaveLower
 
 HWY_API Vec256<uint8_t> InterleaveLower(Vec256<uint8_t> a, Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_i8x16_shuffle(a.raw, b.raw, 0, 16, 1, 17, 2, 18,
+  return Vec256<uint8_t>{wasm_i8x16_shuffle(a.v0.raw, b.v0.raw, 0, 16, 1, 17, 2, 18,
+                                            3, 19, 4, 20, 5, 21, 6, 22, 7, 23),
+                        wasm_i8x16_shuffle(a.v1.raw, b.v1.raw, 0, 16, 1, 17, 2, 18,
                                             3, 19, 4, 20, 5, 21, 6, 22, 7, 23)};
 }
 HWY_API Vec256<uint16_t> InterleaveLower(Vec256<uint16_t> a,
                                          Vec256<uint16_t> b) {
   return Vec256<uint16_t>{
-      wasm_i16x8_shuffle(a.raw, b.raw, 0, 8, 1, 9, 2, 10, 3, 11)};
+      wasm_i16x8_shuffle(a.v0.raw, b.v0.raw, 0, 8, 1, 9, 2, 10, 3, 11),
+      wasm_i16x8_shuffle(a.v1.raw, b.v1.raw, 0, 8, 1, 9, 2, 10, 3, 11)};
 }
 HWY_API Vec256<uint32_t> InterleaveLower(Vec256<uint32_t> a,
                                          Vec256<uint32_t> b) {
-  return Vec256<uint32_t>{wasm_i32x4_shuffle(a.raw, b.raw, 0, 4, 1, 5)};
+  return Vec256<uint32_t>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 0, 4, 1, 5),
+                          wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 0, 4, 1, 5)};
 }
 HWY_API Vec256<uint64_t> InterleaveLower(Vec256<uint64_t> a,
                                          Vec256<uint64_t> b) {
-  return Vec256<uint64_t>{wasm_i64x2_shuffle(a.raw, b.raw, 0, 2)};
+  return Vec256<uint64_t>{wasm_i64x2_shuffle(a.v0.raw, b.v0.raw, 0, 2),
+                          wasm_i64x2_shuffle(a.v1.raw, b.v1.raw, 0, 2)};
 }
 
 HWY_API Vec256<int8_t> InterleaveLower(Vec256<int8_t> a, Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_shuffle(a.raw, b.raw, 0, 16, 1, 17, 2, 18, 3,
+  return Vec256<int8_t>{wasm_i8x16_shuffle(a.v0.raw, b.v0.raw, 0, 16, 1, 17, 2, 18, 3,
+                                           19, 4, 20, 5, 21, 6, 22, 7, 23),
+                        wasm_i8x16_shuffle(a.v1.raw, b.v1.raw, 0, 16, 1, 17, 2, 18, 3,
                                            19, 4, 20, 5, 21, 6, 22, 7, 23)};
 }
 HWY_API Vec256<int16_t> InterleaveLower(Vec256<int16_t> a, Vec256<int16_t> b) {
   return Vec256<int16_t>{
-      wasm_i16x8_shuffle(a.raw, b.raw, 0, 8, 1, 9, 2, 10, 3, 11)};
+      wasm_i16x8_shuffle(a.v0.raw, b.v0.raw, 0, 8, 1, 9, 2, 10, 3, 11),
+      wasm_i16x8_shuffle(a.v1.raw, b.v1.raw, 0, 8, 1, 9, 2, 10, 3, 11)};
 }
 HWY_API Vec256<int32_t> InterleaveLower(Vec256<int32_t> a, Vec256<int32_t> b) {
-  return Vec256<int32_t>{wasm_i32x4_shuffle(a.raw, b.raw, 0, 4, 1, 5)};
+  return Vec256<int32_t>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 0, 4, 1, 5),
+                         wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 0, 4, 1, 5)};
 }
 HWY_API Vec256<int64_t> InterleaveLower(Vec256<int64_t> a, Vec256<int64_t> b) {
-  return Vec256<int64_t>{wasm_i64x2_shuffle(a.raw, b.raw, 0, 2)};
+  return Vec256<int64_t>{wasm_i64x2_shuffle(a.v0.raw, b.v0.raw, 0, 2),
+                         wasm_i64x2_shuffle(a.v1.raw, b.v1.raw, 0, 2)};
 }
 
 HWY_API Vec256<float> InterleaveLower(Vec256<float> a, Vec256<float> b) {
-  return Vec256<float>{wasm_i32x4_shuffle(a.raw, b.raw, 0, 4, 1, 5)};
+  return Vec256<float>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 0, 4, 1, 5),
+                       wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 0, 4, 1, 5)};
 }
 
 // Additional overload for the optional tag.
@@ -1914,42 +2058,55 @@ HWY_API V InterleaveLower(Full256<T> /* tag */, V a, V b) {
 namespace detail {
 
 HWY_API Vec256<uint8_t> InterleaveUpper(Vec256<uint8_t> a, Vec256<uint8_t> b) {
-  return Vec256<uint8_t>{wasm_i8x16_shuffle(a.raw, b.raw, 8, 24, 9, 25, 10, 26,
+  return Vec256<uint8_t>{wasm_i8x16_shuffle(a.v0.raw, b.v0.raw, 8, 24, 9, 25, 10, 26,
+                                            11, 27, 12, 28, 13, 29, 14, 30, 15,
+                                            31),
+                        wasm_i8x16_shuffle(a.v1.raw, b.v1.raw, 8, 24, 9, 25, 10, 26,
                                             11, 27, 12, 28, 13, 29, 14, 30, 15,
                                             31)};
 }
 HWY_API Vec256<uint16_t> InterleaveUpper(Vec256<uint16_t> a,
                                          Vec256<uint16_t> b) {
   return Vec256<uint16_t>{
-      wasm_i16x8_shuffle(a.raw, b.raw, 4, 12, 5, 13, 6, 14, 7, 15)};
+      wasm_i16x8_shuffle(a.v0.raw, b.v0.raw, 4, 12, 5, 13, 6, 14, 7, 15),
+      wasm_i16x8_shuffle(a.v1.raw, b.v1.raw, 4, 12, 5, 13, 6, 14, 7, 15)};
 }
 HWY_API Vec256<uint32_t> InterleaveUpper(Vec256<uint32_t> a,
                                          Vec256<uint32_t> b) {
-  return Vec256<uint32_t>{wasm_i32x4_shuffle(a.raw, b.raw, 2, 6, 3, 7)};
+  return Vec256<uint32_t>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 2, 6, 3, 7),
+                          wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 2, 6, 3, 7)};
 }
 HWY_API Vec256<uint64_t> InterleaveUpper(Vec256<uint64_t> a,
                                          Vec256<uint64_t> b) {
-  return Vec256<uint64_t>{wasm_i64x2_shuffle(a.raw, b.raw, 1, 3)};
+  return Vec256<uint64_t>{wasm_i64x2_shuffle(a.v0.raw, b.v0.raw, 1, 3),
+                          wasm_i64x2_shuffle(a.v1.raw, b.v1.raw, 1, 3)};
 }
 
 HWY_API Vec256<int8_t> InterleaveUpper(Vec256<int8_t> a, Vec256<int8_t> b) {
-  return Vec256<int8_t>{wasm_i8x16_shuffle(a.raw, b.raw, 8, 24, 9, 25, 10, 26,
+  return Vec256<int8_t>{wasm_i8x16_shuffle(a.v0.raw, b.v0.raw, 8, 24, 9, 25, 10, 26,
+                                           11, 27, 12, 28, 13, 29, 14, 30, 15,
+                                           31),
+                        wasm_i8x16_shuffle(a.v1.raw, b.v1.raw, 8, 24, 9, 25, 10, 26,
                                            11, 27, 12, 28, 13, 29, 14, 30, 15,
                                            31)};
 }
 HWY_API Vec256<int16_t> InterleaveUpper(Vec256<int16_t> a, Vec256<int16_t> b) {
   return Vec256<int16_t>{
-      wasm_i16x8_shuffle(a.raw, b.raw, 4, 12, 5, 13, 6, 14, 7, 15)};
+      wasm_i16x8_shuffle(a.v0.raw, b.v0.raw, 4, 12, 5, 13, 6, 14, 7, 15)
+      wasm_i16x8_shuffle(a.v1.raw, b.v1.raw, 4, 12, 5, 13, 6, 14, 7, 15)};
 }
 HWY_API Vec256<int32_t> InterleaveUpper(Vec256<int32_t> a, Vec256<int32_t> b) {
-  return Vec256<int32_t>{wasm_i32x4_shuffle(a.raw, b.raw, 2, 6, 3, 7)};
+  return Vec256<int32_t>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 2, 6, 3, 7),
+                         wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 2, 6, 3, 7)};
 }
 HWY_API Vec256<int64_t> InterleaveUpper(Vec256<int64_t> a, Vec256<int64_t> b) {
-  return Vec256<int64_t>{wasm_i64x2_shuffle(a.raw, b.raw, 1, 3)};
+  return Vec256<int64_t>{wasm_i64x2_shuffle(a.v0.raw, b.v0.raw, 1, 3),
+                         wasm_i64x2_shuffle(a.v1.raw, b.v1.raw, 1, 3)};
 }
 
 HWY_API Vec256<float> InterleaveUpper(Vec256<float> a, Vec256<float> b) {
-  return Vec256<float>{wasm_i32x4_shuffle(a.raw, b.raw, 2, 6, 3, 7)};
+  return Vec256<float>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 2, 6, 3, 7),
+                       wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 2, 6, 3, 7)};
 }
 
 }  // namespace detail
@@ -1981,6 +2138,8 @@ HWY_API VFromD<DW> ZipUpper(DW dw, Vec256<T> a, Vec256<T> b) {
 
 // ------------------------------ Combine (InterleaveLower)
 
+// TODO(jacob-abraham) this looks like it needs to change vector sizes to Vec256
+
 // N = N/2 + N/2 (upper half undefined)
 template <typename T>
 HWY_API Vec256<T> Combine(Full256<T> d, Vec128<T> hi_half, Vec128<T> lo_half) {
@@ -1997,7 +2156,7 @@ HWY_API Vec256<T> Combine(Full256<T> d, Vec128<T> hi_half, Vec128<T> lo_half) {
 
 template <typename T>
 HWY_API Vec256<T> ZeroExtendVector(Full256<T> d, Vec128<T> lo) {
-  return IfThenElseZero(FirstN(d, 16 / sizeof(T)), Vec256<T>{lo.raw});
+  return IfThenElseZero(FirstN(d, 16 / sizeof(T)), Vec256<T>{lo.v0.raw});
 }
 
 // ------------------------------ ConcatLowerLower
@@ -2006,7 +2165,8 @@ HWY_API Vec256<T> ZeroExtendVector(Full256<T> d, Vec128<T> lo) {
 template <typename T>
 HWY_API Vec256<T> ConcatLowerLower(Full256<T> /* tag */, const Vec256<T> hi,
                                    const Vec256<T> lo) {
-  return Vec256<T>{wasm_i64x2_shuffle(lo.raw, hi.raw, 0, 2)};
+  return Vec256<T>{wasm_i64x2_shuffle(lo.v0.raw, hi.v0.raw, 0, 2), 
+                   wasm_i64x2_shuffle(lo.v1.raw, hi.v1.raw, 0, 2)};
 }
 
 // ------------------------------ ConcatUpperUpper
@@ -2014,7 +2174,8 @@ HWY_API Vec256<T> ConcatLowerLower(Full256<T> /* tag */, const Vec256<T> hi,
 template <typename T>
 HWY_API Vec256<T> ConcatUpperUpper(Full256<T> /* tag */, const Vec256<T> hi,
                                    const Vec256<T> lo) {
-  return Vec256<T>{wasm_i64x2_shuffle(lo.raw, hi.raw, 1, 3)};
+  return Vec256<T>{wasm_i64x2_shuffle(lo.v0.raw, hi.v0.raw, 1, 3), 
+                   wasm_i64x2_shuffle(lo.v1.raw, hi.v1.raw, 1, 3)};
 }
 
 // ------------------------------ ConcatLowerUpper
@@ -2037,7 +2198,7 @@ HWY_API Vec256<T> ConcatUpperLower(Full256<T> d, const Vec256<T> hi,
 // 32-bit
 template <typename T, HWY_IF_LANE_SIZE(T, 4)>
 HWY_API Vec256<T> ConcatOdd(Full256<T> /* tag */, Vec256<T> hi, Vec256<T> lo) {
-  return Vec256<T>{wasm_i32x4_shuffle(lo.raw, hi.raw, 1, 3, 5, 7)};
+  return Vec256<T>{wasm_i32x4_shuffle(lo.v0.raw, hi.v0.raw, 1, 3, 5, 7), wasm_i32x4_shuffle(lo.v1.raw, hi.v1.raw, 1, 3, 5, 7)};
 }
 
 // 64-bit full - no partial because we need at least two inputs to have
@@ -2052,7 +2213,7 @@ HWY_API Vec256<T> ConcatOdd(Full256<T> /* tag */, Vec256<T> hi, Vec256<T> lo) {
 // 32-bit full
 template <typename T, HWY_IF_LANE_SIZE(T, 4)>
 HWY_API Vec256<T> ConcatEven(Full256<T> /* tag */, Vec256<T> hi, Vec256<T> lo) {
-  return Vec256<T>{wasm_i32x4_shuffle(lo.raw, hi.raw, 0, 2, 4, 6)};
+  return Vec256<T>{wasm_i32x4_shuffle(lo.v0.raw, hi.v0.raw, 0, 2, 4, 6), wasm_i32x4_shuffle(lo.v1.raw, hi.v1.raw, 0, 2, 4, 6)};
 }
 
 // 64-bit full - no partial because we need at least two inputs to have
@@ -2083,24 +2244,29 @@ HWY_INLINE Vec256<T> OddEven(hwy::SizeTag<1> /* tag */, const Vec256<T> a,
                              const Vec256<T> b) {
   const Full256<T> d;
   const Repartition<uint8_t, decltype(d)> d8;
-  alignas(32) constexpr uint8_t mask[16] = {0xFF, 0, 0xFF, 0, 0xFF, 0, 0xFF, 0,
+  alignas(32) constexpr uint8_t mask[32] = {0xFF, 0, 0xFF, 0, 0xFF, 0, 0xFF, 0,
+                                            0xFF, 0, 0xFF, 0, 0xFF, 0, 0xFF, 0,
+                                            0xFF, 0, 0xFF, 0, 0xFF, 0, 0xFF, 0,
                                             0xFF, 0, 0xFF, 0, 0xFF, 0, 0xFF, 0};
   return IfThenElse(MaskFromVec(BitCast(d, Load(d8, mask))), b, a);
 }
 template <typename T>
 HWY_INLINE Vec256<T> OddEven(hwy::SizeTag<2> /* tag */, const Vec256<T> a,
                              const Vec256<T> b) {
-  return Vec256<T>{wasm_i16x8_shuffle(a.raw, b.raw, 8, 1, 10, 3, 12, 5, 14, 7)};
+  return Vec256<T>{wasm_i16x8_shuffle(a.v0.raw, b.v0.raw, 8, 1, 10, 3, 12, 5, 14, 7),
+                   wasm_i16x8_shuffle(a.v1.raw, b.v1.raw, 8, 1, 10, 3, 12, 5, 14, 7)};
 }
 template <typename T>
 HWY_INLINE Vec256<T> OddEven(hwy::SizeTag<4> /* tag */, const Vec256<T> a,
                              const Vec256<T> b) {
-  return Vec256<T>{wasm_i32x4_shuffle(a.raw, b.raw, 4, 1, 6, 3)};
+  return Vec256<T>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 4, 1, 6, 3),
+                   wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 4, 1, 6, 3)};
 }
 template <typename T>
 HWY_INLINE Vec256<T> OddEven(hwy::SizeTag<8> /* tag */, const Vec256<T> a,
                              const Vec256<T> b) {
-  return Vec256<T>{wasm_i64x2_shuffle(a.raw, b.raw, 2, 1)};
+  return Vec256<T>{wasm_i64x2_shuffle(a.v0.raw, b.v0.raw, 2, 1),
+                   wasm_i64x2_shuffle(a.v1.raw, b.v1.raw, 2, 1)};
 }
 
 }  // namespace detail
@@ -2110,7 +2276,8 @@ HWY_API Vec256<T> OddEven(const Vec256<T> a, const Vec256<T> b) {
   return detail::OddEven(hwy::SizeTag<sizeof(T)>(), a, b);
 }
 HWY_API Vec256<float> OddEven(const Vec256<float> a, const Vec256<float> b) {
-  return Vec256<float>{wasm_i32x4_shuffle(a.raw, b.raw, 4, 1, 6, 3)};
+  return Vec256<float>{wasm_i32x4_shuffle(a.v0.raw, b.v0.raw, 4, 1, 6, 3),
+                       wasm_i32x4_shuffle(a.v1.raw, b.v1.raw, 4, 1, 6, 3)};
 }
 
 // ------------------------------ OddEvenBlocks
@@ -2140,50 +2307,62 @@ HWY_API Vec256<T> ReverseBlocks(Full256<T> /* tag */, const Vec256<T> v) {
 // Unsigned: zero-extend.
 HWY_API Vec256<uint16_t> PromoteTo(Full256<uint16_t> /* tag */,
                                    const Vec128<uint8_t> v) {
-  return Vec256<uint16_t>{wasm_u16x8_extend_low_u8x16(v.raw)};
+  return Vec256<uint16_t>{wasm_u16x8_extend_low_u8x16(v.v0.raw),
+                          wasm_u16x8_extend_low_u8x16(v.v1.raw)};
 }
 HWY_API Vec256<uint32_t> PromoteTo(Full256<uint32_t> /* tag */,
                                    const Vec128<uint8_t> v) {
   return Vec256<uint32_t>{
-      wasm_u32x4_extend_low_u16x8(wasm_u16x8_extend_low_u8x16(v.raw))};
+      wasm_u32x4_extend_low_u16x8(wasm_u16x8_extend_low_u8x16(v.v0.raw),    
+      wasm_u32x4_extend_low_u16x8(wasm_u16x8_extend_low_u8x16(v.v1.raw))};
 }
 HWY_API Vec256<int16_t> PromoteTo(Full256<int16_t> /* tag */,
                                   const Vec128<uint8_t> v) {
-  return Vec256<int16_t>{wasm_u16x8_extend_low_u8x16(v.raw)};
+  return Vec256<int16_t>{wasm_u16x8_extend_low_u8x16(v.v0.raw),
+                         wasm_u16x8_extend_low_u8x16(v.v1.raw)};
 }
 HWY_API Vec256<int32_t> PromoteTo(Full256<int32_t> /* tag */,
                                   const Vec128<uint8_t> v) {
   return Vec256<int32_t>{
-      wasm_u32x4_extend_low_u16x8(wasm_u16x8_extend_low_u8x16(v.raw))};
+      wasm_u32x4_extend_low_u16x8(wasm_u16x8_extend_low_u8x16(v.v0.raw),
+      wasm_u32x4_extend_low_u16x8(wasm_u16x8_extend_low_u8x16(v.v1.raw))};
 }
 HWY_API Vec256<uint32_t> PromoteTo(Full256<uint32_t> /* tag */,
                                    const Vec128<uint16_t> v) {
-  return Vec256<uint32_t>{wasm_u32x4_extend_low_u16x8(v.raw)};
+  return Vec256<uint32_t>{wasm_u32x4_extend_low_u16x8(v.v0.raw), 
+                          wasm_u32x4_extend_low_u16x8(v.v1.raw)};
 }
 HWY_API Vec256<int32_t> PromoteTo(Full256<int32_t> /* tag */,
                                   const Vec128<uint16_t> v) {
-  return Vec256<int32_t>{wasm_u32x4_extend_low_u16x8(v.raw)};
+  return Vec256<int32_t>{wasm_u32x4_extend_low_u16x8(v.v0.raw),
+                         wasm_u32x4_extend_low_u16x8(v.v1.raw)};
 }
 
 // Signed: replicate sign bit.
 HWY_API Vec256<int16_t> PromoteTo(Full256<int16_t> /* tag */,
                                   const Vec128<int8_t> v) {
-  return Vec256<int16_t>{wasm_i16x8_extend_low_i8x16(v.raw)};
+  return Vec256<int16_t>{wasm_i16x8_extend_low_i8x16(v.v0.raw),
+                         wasm_i16x8_extend_low_i8x16(v.v1.raw)};
 }
 HWY_API Vec256<int32_t> PromoteTo(Full256<int32_t> /* tag */,
                                   const Vec128<int8_t> v) {
   return Vec256<int32_t>{
-      wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(v.raw))};
+      wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(v.v0.raw),
+      wasm_i32x4_extend_low_i16x8(wasm_i16x8_extend_low_i8x16(v.v1.raw))};
 }
 HWY_API Vec256<int32_t> PromoteTo(Full256<int32_t> /* tag */,
                                   const Vec128<int16_t> v) {
-  return Vec256<int32_t>{wasm_i32x4_extend_low_i16x8(v.raw)};
+  return Vec256<int32_t>{wasm_i32x4_extend_low_i16x8(v.v0.raw), 
+                         wasm_i32x4_extend_low_i16x8(v.v1.raw)};
 }
 
 HWY_API Vec256<double> PromoteTo(Full256<double> /* tag */,
                                  const Vec128<int32_t> v) {
-  return Vec256<double>{wasm_f64x2_convert_low_i32x4(v.raw)};
+  return Vec256<double>{wasm_f64x2_convert_low_i32x4(v.v0.raw), 
+                        wasm_f64x2_convert_low_i32x4(v.v1.raw)};
 }
+
+// TODO(jacob-abraham) this looks like it will need to change to Vec256
 
 HWY_API Vec256<float> PromoteTo(Full256<float> /* tag */,
                                 const Vec128<float16_t> v) {
@@ -2215,42 +2394,46 @@ HWY_API Vec256<float> PromoteTo(Full256<float> df32,
 
 // ------------------------------ Demotions (full -> part w/ narrow lanes)
 
+// TODO(jacob-abraham) this are likely not correct
+
 HWY_API Vec128<uint16_t> DemoteTo(Full128<uint16_t> /* tag */,
                                   const Vec256<int32_t> v) {
-  return Vec128<uint16_t>{wasm_u16x8_narrow_i32x4(v.raw, v.raw)};
+  return Vec128<uint16_t>{wasm_u16x8_narrow_i32x4(v.v0.raw, v.v0.raw)};
 }
 
 HWY_API Vec128<int16_t> DemoteTo(Full128<int16_t> /* tag */,
                                  const Vec256<int32_t> v) {
-  return Vec128<int16_t>{wasm_i16x8_narrow_i32x4(v.raw, v.raw)};
+  return Vec128<int16_t>{wasm_i16x8_narrow_i32x4(v.v0.raw, v.v0.raw)};
 }
 
 HWY_API Vec128<uint8_t> DemoteTo(Full128<uint8_t> /* tag */,
                                  const Vec256<int32_t> v) {
-  const auto intermediate = wasm_i16x8_narrow_i32x4(v.raw, v.raw);
+  const auto intermediate = wasm_i16x8_narrow_i32x4(v.v0.raw, v.v0.raw);
   return Vec128<uint8_t>{wasm_u8x16_narrow_i16x8(intermediate, intermediate)};
 }
 
 HWY_API Vec128<uint8_t> DemoteTo(Full128<uint8_t> /* tag */,
                                  const Vec256<int16_t> v) {
-  return Vec128<uint8_t>{wasm_u8x16_narrow_i16x8(v.raw, v.raw)};
+  return Vec128<uint8_t>{wasm_u8x16_narrow_i16x8(v.v0.raw, v.v0.raw)};
 }
 
 HWY_API Vec128<int8_t> DemoteTo(Full128<int8_t> /* tag */,
                                 const Vec256<int32_t> v) {
-  const auto intermediate = wasm_i16x8_narrow_i32x4(v.raw, v.raw);
+  const auto intermediate = wasm_i16x8_narrow_i32x4(v.v0.raw, v.v0.raw);
   return Vec128<int8_t>{wasm_i8x16_narrow_i16x8(intermediate, intermediate)};
 }
 
 HWY_API Vec128<int8_t> DemoteTo(Full128<int8_t> /* tag */,
                                 const Vec256<int16_t> v) {
-  return Vec128<int8_t>{wasm_i8x16_narrow_i16x8(v.raw, v.raw)};
+  return Vec128<int8_t>{wasm_i8x16_narrow_i16x8(v.v0.raw, v.v0.raw)};
 }
 
 HWY_API Vec128<int32_t> DemoteTo(Full128<int32_t> /* di */,
                                  const Vec256<double> v) {
-  return Vec128<int32_t>{wasm_i32x4_trunc_sat_f64x2_zero(v.raw)};
+  return Vec128<int32_t>{wasm_i32x4_trunc_sat_f64x2_zero(v.v0.raw), wasm_i32x4_trunc_sat_f64x2_zero(v.v1.raw)};
 }
+
+// TODO(jacob-abraham) not sure DemoteTo(du16, bits16).raw is correct
 
 HWY_API Vec128<float16_t> DemoteTo(Full128<float16_t> /* tag */,
                                    const Vec256<float> v) {
@@ -2300,7 +2483,7 @@ HWY_API Vec128<bfloat16_t> ReorderDemote2To(Full128<bfloat16_t> dbf16,
 
 // For already range-limited input [0, 255].
 HWY_API Vec256<uint8_t> U8FromU32(const Vec256<uint32_t> v) {
-  const auto intermediate = wasm_i16x8_narrow_i32x4(v.raw, v.raw);
+  const auto intermediate = wasm_i16x8_narrow_i32x4(v.v0.raw, v.v0.raw);
   return Vec256<uint8_t>{wasm_u8x16_narrow_i16x8(intermediate, intermediate)};
 }
 
@@ -2308,12 +2491,12 @@ HWY_API Vec256<uint8_t> U8FromU32(const Vec256<uint32_t> v) {
 
 HWY_API Vec256<float> ConvertTo(Full256<float> /* tag */,
                                 const Vec256<int32_t> v) {
-  return Vec256<float>{wasm_f32x4_convert_i32x4(v.raw)};
+  return Vec256<float>{wasm_f32x4_convert_i32x4(v.v0.raw), wasm_f32x4_convert_i32x4(v.v1.raw)};
 }
 // Truncates (rounds toward zero).
 HWY_API Vec256<int32_t> ConvertTo(Full256<int32_t> /* tag */,
                                   const Vec256<float> v) {
-  return Vec256<int32_t>{wasm_i32x4_trunc_sat_f32x4(v.raw)};
+  return Vec256<int32_t>{wasm_i32x4_trunc_sat_f32x4(v.v0.raw), wasm_i32x4_trunc_sat_f32x4(v.v1.raw)};
 }
 
 HWY_API Vec256<int32_t> NearestInt(const Vec256<float> v) {
@@ -2331,14 +2514,19 @@ HWY_INLINE Mask256<T> LoadMaskBits(Full256<T> d, uint64_t bits) {
   const RebindToUnsigned<decltype(d)> du;
   // Easier than Set(), which would require an >8-bit type, which would not
   // compile for T=uint8_t, N=1.
-  const Vec256<T> vbits{wasm_i32x4_splat(static_cast<int32_t>(bits))};
+  auto bits1 = static_cast<int32_t>(bits);
+  const Vec256<T> vbits{wasm_i32x4_splat(bits1), wasm_i32x4_splat(bits1)};
 
   // Replicate bytes 8x such that each byte contains the bit that governs it.
-  alignas(32) constexpr uint8_t kRep8[16] = {0, 0, 0, 0, 0, 0, 0, 0,
+  alignas(32) constexpr uint8_t kRep8[32] = {0, 0, 0, 0, 0, 0, 0, 0,
+                                             1, 1, 1, 1, 1, 1, 1, 1,
+                                             0, 0, 0, 0, 0, 0, 0, 0,
                                              1, 1, 1, 1, 1, 1, 1, 1};
   const auto rep8 = TableLookupBytes(vbits, Load(du, kRep8));
 
-  alignas(32) constexpr uint8_t kBit[16] = {1, 2, 4, 8, 16, 32, 64, 128,
+  alignas(32) constexpr uint8_t kBit[32] = {1, 2, 4, 8, 16, 32, 64, 128,
+                                            1, 2, 4, 8, 16, 32, 64, 128,
+                                            1, 2, 4, 8, 16, 32, 64, 128,
                                             1, 2, 4, 8, 16, 32, 64, 128};
   return RebindMask(d, TestBit(rep8, LoadDup128(du, kBit)));
 }
@@ -2346,21 +2534,22 @@ HWY_INLINE Mask256<T> LoadMaskBits(Full256<T> d, uint64_t bits) {
 template <typename T, HWY_IF_LANE_SIZE(T, 2)>
 HWY_INLINE Mask256<T> LoadMaskBits(Full256<T> d, uint64_t bits) {
   const RebindToUnsigned<decltype(d)> du;
-  alignas(32) constexpr uint16_t kBit[8] = {1, 2, 4, 8, 16, 32, 64, 128};
+  alignas(32) constexpr uint16_t kBit[16] = {1, 2, 4, 8, 16, 32, 64, 128,
+                                             1, 2, 4, 8, 16, 32, 64, 128};
   return RebindMask(d, TestBit(Set(du, bits), Load(du, kBit)));
 }
 
 template <typename T, HWY_IF_LANE_SIZE(T, 4)>
 HWY_INLINE Mask256<T> LoadMaskBits(Full256<T> d, uint64_t bits) {
   const RebindToUnsigned<decltype(d)> du;
-  alignas(32) constexpr uint32_t kBit[8] = {1, 2, 4, 8};
+  alignas(32) constexpr uint32_t kBit[8] = {1, 2, 4, 8, 1, 2, 4, 8};
   return RebindMask(d, TestBit(Set(du, bits), Load(du, kBit)));
 }
 
 template <typename T, HWY_IF_LANE_SIZE(T, 8)>
 HWY_INLINE Mask256<T> LoadMaskBits(Full256<T> d, uint64_t bits) {
   const RebindToUnsigned<decltype(d)> du;
-  alignas(32) constexpr uint64_t kBit[8] = {1, 2};
+  alignas(32) constexpr uint64_t kBit[4] = {1, 2, 1, 2};
   return RebindMask(d, TestBit(Set(du, bits), Load(du, kBit)));
 }
 
@@ -2379,12 +2568,15 @@ HWY_API Mask256<T> LoadMaskBits(Full256<T> d,
 
 namespace detail {
 
+// TODOD(jacob-abraham) this is definitely not correct
+
 // Full
 template <typename T>
 HWY_INLINE uint64_t BitsFromMask(hwy::SizeTag<1> /*tag*/,
-                                 const Mask128<T> mask) {
-  alignas(32) uint64_t lanes[2];
-  wasm_v128_store(lanes, mask.raw);
+                                 const Mask256<T> mask) {
+  alignas(32) uint64_t lanes[4];
+  wasm_v128_store(lanes, mask.v0.raw);
+  wasm_v128_store(lanes, mask.v1.raw);
 
   constexpr uint64_t kMagic = 0x103070F1F3F80ULL;
   const uint64_t lo = ((lanes[0] * kMagic) >> 56);
@@ -2397,14 +2589,17 @@ HWY_INLINE uint64_t BitsFromMask(hwy::SizeTag<2> /*tag*/,
                                  const Mask256<T> mask) {
   // Remove useless lower half of each u16 while preserving the sign bit.
   const __i16x8 zero = wasm_i16x8_splat(0);
-  const Mask256<uint8_t> mask8{wasm_i8x16_narrow_i16x8(mask.raw, zero)};
+  const Mask256<uint8_t> mask8{wasm_i8x16_narrow_i16x8(mask.v0.raw, zero), 
+                               wasm_i8x16_narrow_i16x8(mask.v1.raw, zero)};
   return BitsFromMask(hwy::SizeTag<1>(), mask8);
 }
+
+// TODO(jacob-abraham) FIXME this is wrong
 
 template <typename T>
 HWY_INLINE uint64_t BitsFromMask(hwy::SizeTag<4> /*tag*/,
                                  const Mask256<T> mask) {
-  const __i32x4 mask_i = static_cast<__i32x4>(mask.raw);
+  const __i32x4 mask_i = static_cast<__i32x4>(mask.v0.raw);
   const __i32x4 slice = wasm_i32x4_make(1, 2, 4, 8);
   const __i32x4 sliced_mask = wasm_v128_and(mask_i, slice);
   alignas(32) uint32_t lanes[4];
@@ -2488,14 +2683,18 @@ HWY_API bool AllFalse(const Full256<T> d, const Mask128<T> m) {
   // Casting followed by wasm_i8x16_any_true results in wasm error:
   // i32.eqz[0] expected type i32, found i8x16.popcnt of type s128
   const auto v8 = BitCast(Full256<int8_t>(), VecFromMask(d, m));
-  return !wasm_i8x16_any_true(v8.raw);
+  return !wasm_i8x16_any_true(v8.v0.raw) && !wasm_i8x16_any_true(v8.v1.raw);
 #else
   (void)d;
-  return (wasm_i64x2_extract_lane(m.raw, 0) |
-          wasm_i64x2_extract_lane(m.raw, 1)) == 0;
+  return (wasm_i64x2_extract_lane(m.v0.raw, 0) |
+          wasm_i64x2_extract_lane(m.v0.raw, 1) |
+          wasm_i64x2_extract_lane(m.v1.raw, 0) |
+          wasm_i64x2_extract_lane(m.v1.raw, 1)) == 0;
 #endif
 }
 
+
+// TODO(jacob-abraham) these look wrong, vector length needs to change
 // Full vector
 namespace detail {
 template <typename T>
@@ -2528,6 +2727,8 @@ HWY_API intptr_t FindFirstTrue(const Full256<T> /* tag */,
 // ------------------------------ Compress
 
 namespace detail {
+
+// TODO(jacob-abraham) this looks wrong and will need to change, but I am scared to touch it
 
 template <typename T>
 HWY_INLINE Vec256<T> Idx16x8FromBits(const uint64_t mask_bits) {
@@ -2662,6 +2863,8 @@ HWY_INLINE Vec256<T> Idx16x8FromBits(const uint64_t mask_bits) {
   return BitCast(d, pairs + Set(du, 0x0100));
 }
 
+// TODO(jacob-abraham) this looks wrong and will need to change, but I am scared to touch it
+
 template <typename T>
 HWY_INLINE Vec256<T> Idx32x4FromBits(const uint64_t mask_bits) {
   HWY_DASSERT(mask_bits < 16);
@@ -2691,6 +2894,8 @@ HWY_INLINE Vec256<T> Idx32x4FromBits(const uint64_t mask_bits) {
 }
 
 #if HWY_HAVE_INTEGER64 || HWY_HAVE_FLOAT64
+
+// TODO(jacob-abraham) this looks wrong and will need to change, but I am scared to touch it
 
 template <typename T>
 HWY_INLINE Vec256<T> Idx64x2FromBits(const uint64_t mask_bits) {
@@ -2824,19 +3029,25 @@ HWY_API size_t CompressBitsStore(Vec256<T> v, const uint8_t* HWY_RESTRICT bits,
 
 HWY_INLINE Vec256<uint64_t> MulEven(const Vec256<uint64_t> a,
                                     const Vec256<uint64_t> b) {
-  alignas(32) uint64_t mul[2];
+  alignas(32) uint64_t mul[4];
   mul[0] =
-      Mul128(static_cast<uint64_t>(wasm_i64x2_extract_lane(a.raw, 0)),
-             static_cast<uint64_t>(wasm_i64x2_extract_lane(b.raw, 0)), &mul[1]);
+      Mul128(static_cast<uint64_t>(wasm_i64x2_extract_lane(a.v0.raw, 0)),
+             static_cast<uint64_t>(wasm_i64x2_extract_lane(b.v0.raw, 0)), &mul[1]);
+  mul[2] =
+      Mul128(static_cast<uint64_t>(wasm_i64x2_extract_lane(a.v1.raw, 0)),
+             static_cast<uint64_t>(wasm_i64x2_extract_lane(b.v1.raw, 0)), &mul[3]);
   return Load(Full256<uint64_t>(), mul);
 }
 
 HWY_INLINE Vec256<uint64_t> MulOdd(const Vec256<uint64_t> a,
                                    const Vec256<uint64_t> b) {
-  alignas(32) uint64_t mul[2];
+  alignas(32) uint64_t mul[4];
   mul[0] =
-      Mul128(static_cast<uint64_t>(wasm_i64x2_extract_lane(a.raw, 1)),
-             static_cast<uint64_t>(wasm_i64x2_extract_lane(b.raw, 1)), &mul[1]);
+      Mul128(static_cast<uint64_t>(wasm_i64x2_extract_lane(a.v0.raw, 1)),
+             static_cast<uint64_t>(wasm_i64x2_extract_lane(b.v0.raw, 1)), &mul[1]);
+  mul[2] =
+      Mul128(static_cast<uint64_t>(wasm_i64x2_extract_lane(a.v1.raw, 1)),
+             static_cast<uint64_t>(wasm_i64x2_extract_lane(b.v1.raw, 1)), &mul[3]);
   return Load(Full256<uint64_t>(), mul);
 }
 
