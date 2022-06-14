@@ -106,6 +106,14 @@ struct Mask128 {
   typename detail::Raw128<T>::type raw;
 };
 
+#if HWY_TARGET <= HWY_WASM2
+template <typename T>
+using Full256 = Simd<T, 32 / sizeof(T), 0>;
+
+template <typename T, size_t N = 32 / sizeof(T)>
+class Vec256;
+#endif
+
 namespace detail {
 
 // Deduce Simd<T, N, 0> from Vec128<T, N>
@@ -114,6 +122,12 @@ struct DeduceD {
   Simd<T, N, 0> operator()(Vec128<T, N>) const {
     return Simd<T, N, 0>();
   }
+  #if HWY_TARGET <= HWY_WASM2
+  template <typename T, size_t N>
+  Full256<T> operator()(Vec256<T, N>) const {
+    return Full256<T>();
+  }
+#endif
 };
 
 }  // namespace detail

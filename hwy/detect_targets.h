@@ -175,7 +175,9 @@
 // HWY_TARGET == HWY_BASELINE_SCALAR.
 
 #if HWY_ARCH_WASM && defined(__wasm_simd128__)
-#if defined(HWY_WANT_WASM2)
+#if defined(HWY_WANT_WASM2) && defined(HWY_WANT_WASM)
+#define HWY_BASELINE_WASM (HWY_WASM | HWY_WASM2)
+#elif defined(HWY_WANT_WASM2)
 #define HWY_BASELINE_WASM HWY_WASM2
 #else
 #define HWY_BASELINE_WASM HWY_WASM
